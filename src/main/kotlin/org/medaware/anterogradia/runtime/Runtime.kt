@@ -5,7 +5,7 @@ import org.medaware.anterogradia.libs.Standard
 import org.medaware.anterogradia.runtime.library.LibraryManager
 import org.medaware.anterogradia.syntax.FunctionCall
 
-class Runtime {
+class Runtime(val parameters: HashMap<String, String> = hashMapOf()) {
 
     private val libManager = LibraryManager()
 

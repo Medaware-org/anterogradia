@@ -16,5 +16,7 @@ progn {
             else    =   "Mrs. "),
 
         mem:get(key = "guest")
-    }
+    },
+
+    param(key = "time")
 }

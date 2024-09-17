@@ -60,4 +60,7 @@ class Standard(val runtime: Runtime) {
     @Function(identifier = "equal", params = ["a", "b"])
     fun equal(a: Node, b: Node): String = if (a.evaluate(runtime) == b.evaluate(runtime)) "true" else "false"
 
+    @Function(identifier = "param", params = ["key"])
+    fun parameter(id: Node): String = runtime.parameters[id.evaluate(runtime)] ?: ""
+
 }

@@ -5,6 +5,7 @@ import org.medaware.anterogradia.syntax.parser.Parser
 import java.nio.file.Files
 import java.nio.file.Path
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.util.*
 import java.util.logging.ConsoleHandler
 import java.util.logging.LogRecord
@@ -31,9 +32,11 @@ object Anterogradia {
         logger.useParentHandlers = false
     }
 
-    fun invokeCompiler(input: String, runtime: Runtime = Runtime()): AnterogradiaResult {
+    fun invokeCompiler(input: String, parameters: HashMap<String, String> = hashMapOf()): AnterogradiaResult {
         var result: String
         var except: Exception? = null
+
+        val runtime = Runtime(parameters)
 
         try {
             val script = Parser.parseScript(input)
@@ -52,12 +55,13 @@ object Anterogradia {
 fun main() {
     val input = Files.readString(Path.of("concept.antg"))
 
-    Anterogradia.invokeCompiler(input).use { input, output, except ->
-        if (except != null) {
-            except.printStackTrace()
-        } else {
-            println(output)
+    Anterogradia.invokeCompiler(input, parameters = hashMapOf("time" to Instant.now().toString()))
+        .use { input, output, except ->
+            if (except != null) {
+                except.printStackTrace()
+            } else {
+                println(output)
+            }
         }
-    }
 
 }
