@@ -43,8 +43,8 @@ class LibraryManager {
                 if (it.parameters.size != 1)
                     throw SanityException("Sanity check failed for '${lib.simpleName}': A variadic function is expected to have a single string array parameter.")
 
-                if (it.parameters.first().type != Array<String>::class.java)
-                    throw SanityException("Sanity check failed for '${lib.simpleName}': A variadic function is expected to have a parameter of type Array<String>, got ${it.parameters.first().type.simpleName}")
+                if (it.parameters.first().type != Array<Node>::class.java)
+                    throw SanityException("Sanity check failed for '${lib.simpleName}': A variadic function is expected to have a parameter of type Array<Node>, got ${it.parameters.first().type.simpleName}")
 
                 registeredFunctions.add(variadic.identifier to null)
 
@@ -77,8 +77,8 @@ class LibraryManager {
 
             // All parameters must be String-s and their count must match the array's length
 
-            if (it.parameters.any { it.type != String::class.java })
-                throw SanityException("Sanity check failed for '${lib.simpleName}': All function parameters must be of type String. This rule is violated in function '${function.identifier}' (${it.name}).")
+            if (it.parameters.any { it.type != Node::class.java })
+                throw SanityException("Sanity check failed for '${lib.simpleName}': All function parameters must be of type Node. This rule is violated in function '${function.identifier}' (${it.name}).")
 
             if (it.parameters.size != params.size)
                 throw SanityException("Sanity check failed for '${lib.simpleName}': The length of the parameter list does not match the method's parameters of function '${function.identifier}' (${it.name}): ${it.parameters.size} parameters in the definition, ${function.params.size} parameters declared in the annotation.")
@@ -133,7 +133,7 @@ class LibraryManager {
             if (variadicFunctions.size != 1)
                 throw FunctionCallException("There is more than one variadic function of the same name ('${name}'). This should never happen!")
 
-            val params = args.values.map { it.evaluate(runtime) }.toTypedArray()
+            val params = args.values.toTypedArray()
             val instance = lib.getConstructor(Runtime::class.java).newInstance(runtime)
 
             return variadicFunctions.first().first.invoke(instance, params) as String
@@ -155,9 +155,7 @@ class LibraryManager {
             .replace("[", "").replace("]", "\n")
 
         if (method.size == 1) {
-            val groupedParams = groupParameters(args, method.first().second).map {
-                it.evaluate(runtime)
-            }.toTypedArray()
+            val groupedParams = groupParameters(args, method.first().second).toTypedArray()
             val instance = lib.getConstructor(Runtime::class.java).newInstance(runtime)
             if (groupedParams.isNotEmpty())
                 return method.first().first.invoke(instance, *groupedParams) as String

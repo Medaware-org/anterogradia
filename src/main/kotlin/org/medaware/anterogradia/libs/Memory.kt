@@ -3,6 +3,7 @@ package org.medaware.anterogradia.libs
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.Function
+import org.medaware.anterogradia.syntax.Node
 
 @AnterogradiaLibrary(prefix = "mem")
 class Memory(val runtime: Runtime) {
@@ -12,14 +13,14 @@ class Memory(val runtime: Runtime) {
     }
 
     @Function(identifier = "set", params = ["key", "value"])
-    fun setVariable(key: String, value: String): String {
-        variables[key] = value
+    fun setVariable(key: Node, value: Node): String {
+        variables[key.evaluate(runtime)] = value.evaluate(runtime)
         return ""
     }
 
     @Function(identifier = "get", params = ["key"])
-    fun getVariable(key: String): String {
-        return variables[key] ?: "nothing"
+    fun getVariable(key: Node): String {
+        return variables[key.evaluate(runtime)] ?: "nothing"
     }
 
 }
