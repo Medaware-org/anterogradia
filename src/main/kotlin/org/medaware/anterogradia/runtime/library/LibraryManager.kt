@@ -31,13 +31,17 @@ class LibraryManager {
         }
 
         // Require all libraries to have an "about" function
-        lib.declaredMethods.find { it.isAnnotationPresent(Function::class.java) && it.getAnnotation(Function::class.java).identifier == "about" }
+        lib.declaredMethods.find {
+            it.isAnnotationPresent(DiscreteFunction::class.java) && it.getAnnotation(
+                DiscreteFunction::class.java
+            ).identifier == "about"
+        }
             ?: throw SanityException("Sanity check failed for '${lib.simpleName}': Each library is expected to have a parameter-less discrete 'about' function.")
 
         lib.declaredMethods.forEach {
 
-            if (it.isAnnotationPresent(Function::class.java) && it.isAnnotationPresent(VariadicFunction::class.java))
-                throw SanityException("Sanity check failed for '${lib.simpleName}': A function must not be annotated with both @VariadicFunction and @Function at the same time.")
+            if (it.isAnnotationPresent(DiscreteFunction::class.java) && it.isAnnotationPresent(VariadicFunction::class.java))
+                throw SanityException("Sanity check failed for '${lib.simpleName}': A function must not be annotated with both @VariadicFunction and @DiscreteFunction at the same time.")
 
             /**
              * Handle variadic functions
@@ -65,10 +69,10 @@ class LibraryManager {
              * Regular (discrete) functions
              */
 
-            val function = it.getAnnotation(Function::class.java) ?: return@forEach
+            val function = it.getAnnotation(DiscreteFunction::class.java) ?: return@forEach
 
             if (it.returnType != String::class.java)
-                throw SanityException("All Anterogradia @Function-s must return a String value. Function '${function.identifier}' (${it.name}) violates this rule by returning '${it.returnType.simpleName}'.")
+                throw SanityException("All Anterogradia @DiscreteFunction-s must return a String value. Function '${function.identifier}' (${it.name}) violates this rule by returning '${it.returnType.simpleName}'.")
 
             // Parameter names must not overlap
             val params = mutableListOf<String>()
@@ -122,9 +126,10 @@ class LibraryManager {
         val lib =
             libByPrefix(prefix) ?: throw FunctionCallException("Could not find any library with prefix '$prefix'.")
 
-        val rawMethods = lib.declaredMethods.filter { it.getAnnotation(Function::class.java)?.identifier == name }
+        val rawMethods =
+            lib.declaredMethods.filter { it.getAnnotation(DiscreteFunction::class.java)?.identifier == name }
 
-        val methods = rawMethods.map { (it to it.getAnnotation(Function::class.java)) }
+        val methods = rawMethods.map { (it to it.getAnnotation(DiscreteFunction::class.java)) }
 
         if (methods.isEmpty()) {
             /**
@@ -132,7 +137,7 @@ class LibraryManager {
              */
 
             val variadicFunctions =
-                lib.declaredMethods.filter { it.name == name && it.isAnnotationPresent(VariadicFunction::class.java) }
+                lib.declaredMethods.filter { it.getAnnotation(VariadicFunction::class.java)?.identifier == name }
                     .mapNotNull { (it to it.getAnnotation(VariadicFunction::class.java)) }
 
             val s = if (variadic) " variadic" else ""
@@ -178,7 +183,7 @@ class LibraryManager {
         throw FunctionCallException("Could not find discrete function $prefix:$name with the desired number of parameters (${args.size}). Possible matches:\n$matchesString")
     }
 
-    private fun groupParameters(params: HashMap<String, Node>, function: Function): List<Node> {
+    private fun groupParameters(params: HashMap<String, Node>, function: DiscreteFunction): List<Node> {
         val result = mutableListOf<Node>()
 
         if (!function.params.sortedArray().contentEquals(params.keys.toTypedArray().sortedArray()))

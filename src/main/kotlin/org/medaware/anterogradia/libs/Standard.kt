@@ -2,15 +2,15 @@ package org.medaware.anterogradia.libs
 
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
-import org.medaware.anterogradia.runtime.library.Function
+import org.medaware.anterogradia.runtime.library.DiscreteFunction
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
 
 @AnterogradiaLibrary
 class Standard(val runtime: Runtime) {
 
-    @Function(identifier = "about")
-    fun about(): String = "Anterogradia Standard Library\n{C} 2024 Medaware\n"
+    @DiscreteFunction(identifier = "about")
+    fun about(): String = "Anterogradia Standard Library\n{C} Medaware, 2024\n"
 
     @VariadicFunction(identifier = "sequence")
     fun sequence(params: Array<Node>) = params.joinToString(separator = "") { it.evaluate(runtime) }
@@ -22,17 +22,17 @@ class Standard(val runtime: Runtime) {
         return last
     }
 
-    @Function(identifier = "nothing")
+    @DiscreteFunction(identifier = "nothing")
     fun nothing(): String = ""
 
-    @Function(identifier = "repeat", params = ["count", "str"])
+    @DiscreteFunction(identifier = "repeat", params = ["count", "str"])
     fun repeat(count: Node, str: Node) = try {
         str.evaluate(runtime).repeat(count.evaluate(runtime).toInt())
     } catch (e: NumberFormatException) {
         str.evaluate(runtime)
     }
 
-    @Function(identifier = "repeat", params = ["count", "str", "separator"])
+    @DiscreteFunction(identifier = "repeat", params = ["count", "str", "separator"])
     fun repeat(count: Node, str: Node, separator: Node) = try {
         List(count.evaluate(runtime).toInt()) { str.evaluate(runtime) }.joinToString(
             separator = separator.evaluate(
@@ -46,7 +46,7 @@ class Standard(val runtime: Runtime) {
     @VariadicFunction(identifier = "random")
     fun random(strings: Array<Node>): String = strings.random().evaluate(runtime)
 
-    @Function(identifier = "if", params = ["cond", "then", "else"])
+    @DiscreteFunction(identifier = "if", params = ["cond", "then", "else"])
     fun evalIf(str: Node, then: Node, _else: Node): String {
         val condStr = str.evaluate(runtime)
 
@@ -57,10 +57,10 @@ class Standard(val runtime: Runtime) {
         return _else.evaluate(runtime)
     }
 
-    @Function(identifier = "equal", params = ["a", "b"])
+    @DiscreteFunction(identifier = "equal", params = ["a", "b"])
     fun equal(a: Node, b: Node): String = if (a.evaluate(runtime) == b.evaluate(runtime)) "true" else "false"
 
-    @Function(identifier = "param", params = ["key"])
+    @DiscreteFunction(identifier = "param", params = ["key"])
     fun parameter(id: Node): String = runtime.parameters[id.evaluate(runtime)] ?: ""
 
 }

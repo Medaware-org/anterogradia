@@ -1,22 +1,20 @@
-@library "org.medaware.anterogradia.libs.Memory"
+@library "org.medaware.anterogradia.libs.HTML"
 
-progn {
-    mem:set(key = "guest",
-            value = random {
-                "Braun",
-                "Merkel"
-            }),
-
-    sequence {
-        "Hello, ",
-
-        if (cond    =   equal(  a = mem:get(key = "guest"),
-                                b = "Braun"),
-            then    =   "Mr. ",
-            else    =   "Mrs. "),
-
-        mem:get(key = "guest")
-    },
-
-    param(key = "time")
+HTML:html {
+    HTML:head {},
+    HTML:body {
+        HTML:div (
+            attributes = HTML:classList { "title-heading" },
+            body = sequence {
+                HTML:h1 (
+                    attributes = nothing(),
+                    body = "Hello, World!"
+                )
+            }
+        ),
+        HTML:h1 (
+            attributes = nothing(),
+            body = "Medaware.org"
+        )
+    }
 }
