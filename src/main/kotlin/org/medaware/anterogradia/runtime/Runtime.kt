@@ -11,7 +11,6 @@ class Runtime {
 
     init {
         libManager.register(Standard::class.java)
-        Anterogradia.logger.info("Runtime startup OK.")
     }
 
     fun loadLibrary(path: String) {

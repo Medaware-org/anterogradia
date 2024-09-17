@@ -25,9 +25,9 @@ class LibraryManager {
         val registeredFunctions = mutableSetOf<Pair<String, Int?>>()
 
         try {
-            lib.getConstructor()
+            lib.getConstructor(Runtime::class.java)
         } catch (e: Exception) {
-            throw SanityException("Sanity check failed for '${lib.simpleName}': The class is expected to have a nullary constructor.")
+            throw SanityException("Sanity check failed for '${lib.simpleName}': The class is expected to have a constructor with only a runtime parameter.")
         }
 
         lib.declaredMethods.forEach {
@@ -134,7 +134,7 @@ class LibraryManager {
                 throw FunctionCallException("There is more than one variadic function of the same name ('${name}'). This should never happen!")
 
             val params = args.values.map { it.evaluate(runtime) }.toTypedArray()
-            val instance = lib.getConstructor().newInstance()
+            val instance = lib.getConstructor(Runtime::class.java).newInstance(runtime)
 
             return variadicFunctions.first().first.invoke(instance, params) as String
         }
@@ -158,7 +158,7 @@ class LibraryManager {
             val groupedParams = groupParameters(args, method.first().second).map {
                 it.evaluate(runtime)
             }.toTypedArray()
-            val instance = lib.getConstructor().newInstance()
+            val instance = lib.getConstructor(Runtime::class.java).newInstance(runtime)
             if (groupedParams.isNotEmpty())
                 return method.first().first.invoke(instance, *groupedParams) as String
             return method.first().first.invoke(instance) as String

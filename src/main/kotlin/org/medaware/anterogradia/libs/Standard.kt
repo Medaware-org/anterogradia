@@ -1,11 +1,12 @@
 package org.medaware.anterogradia.libs
 
+import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.Function
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 
 @AnterogradiaLibrary
-class Standard {
+class Standard(val runtime: Runtime) {
 
     @VariadicFunction(identifier = "sequence")
     fun sequence(params: Array<String>) = params.joinToString(separator = "")

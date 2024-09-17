@@ -1,10 +1,11 @@
 package org.medaware.anterogradia.libs
 
+import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.Function
 
 @AnterogradiaLibrary(prefix = "mem")
-class Memory {
+class Memory(val runtime: Runtime) {
 
     companion object {
         private val variables: HashMap<String, String> = hashMapOf()

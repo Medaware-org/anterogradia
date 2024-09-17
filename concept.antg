@@ -1,11 +1,11 @@
-@library "org.medaware.anterogradia.libs.Memory"
+@library "org.medaware.anterogradia.libs.LibMan"
 
 progn {
+    libman:load(path = "org.medaware.anterogradia.libs.Memory"),
     mem:set(key = "abc", value = "I really like donald trump!"),
     repeat (
         count = 5,
         str = mem:get(key = "abc"),
         separator = " "
-    ),
-    nothing()
+    )
 }
