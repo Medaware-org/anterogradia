@@ -1,12 +1,8 @@
-__htmltemplate (
-    content = article (
-        _title = title(a = "Drug usage rates amount youth"),
-        _lead = load(a = "Lorem ipsum dolor sit amet"),
-        _banner = banner(a = "http://absdfeg.org/img.png"),
-        _content = content (
-            a = "Lorem ipsum dolor sit amet",
-            b = image(a = "http://resources.io/another_image.png"),
-            c = "Amet sit Dolor, ipsum lorem"
-       )
+div (
+    attributes = "",
+    html = div (
+        attributes = "",
+        html = "<a>Hello, World!</a>"
     )
 )
+

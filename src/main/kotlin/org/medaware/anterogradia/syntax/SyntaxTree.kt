@@ -8,9 +8,7 @@ sealed class Node {
 }
 
 data class FunctionCall(val identifier: Token, val arguments: HashMap<String, Node>) : Node() {
-    override fun evaluate(runtime: Runtime): String {
-        TODO("Not yet implemented")
-    }
+    override fun evaluate(runtime: Runtime): String = runtime.callFunction(this)
 }
 
 data class StringLiteral(val value: String) : Node() {

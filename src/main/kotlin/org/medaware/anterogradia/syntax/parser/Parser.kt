@@ -108,4 +108,8 @@ class Parser(private val tokenizer: Tokenizer) {
         return FunctionCall(functionId, params)
     }
 
+    companion object {
+        fun parseScript(str: String): Node = Parser(Tokenizer(str)).parseExpression()
+    }
+
 }
