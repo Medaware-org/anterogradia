@@ -5,34 +5,18 @@ A markup system for the Medaware platform
 ## Example Program
 
 ```js
-@library
-"org.medaware.anterogradia.libs.Memory"
+@library "org.medaware.anterogradia.libs.Memory"
 
-progn
-{
-    mem:set(key = "guest",
-        value = random
-    {
-        "Braun",
-            "Merkel"
-    }
-),
-
-    sequence
-    {
-        "Hello, ",
-
-        if (cond = equal(a = mem:
-        get(key = "guest"),
-            b = "Braun"
-    ),
-        then = "Mr. ",
-    else
-        = "Mrs. "
-    ),
-
-        mem:get(key = "guest")
-    }
+progn {
+   mem:set(key = "guest", value = random {"Braun", "Merkel"}),
+   sequence {
+      "Hello, ",
+      if (    cond = equal(  a = mem:get(key = "guest"), 
+              b = "Braun"),
+              then = "Mr. ",
+              else = "Mrs. "),
+      mem:get(key = "guest")
+   }
 }
 ```
 
