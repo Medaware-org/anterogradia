@@ -1,17 +1,17 @@
 package org.medaware.anterogradia.runtime.library
 
+import org.medaware.anterogradia.Anterogradia
 import org.medaware.anterogradia.exception.FunctionCallException
 import org.medaware.anterogradia.exception.LibraryException
 import org.medaware.anterogradia.exception.SanityException
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.syntax.Node
-import java.util.logging.Logger
 
 class LibraryManager {
 
     private val libraries: MutableSet<Class<*>> = mutableSetOf()
 
-    private val logger = Logger.getLogger(javaClass.simpleName)
+    private val logger = Anterogradia.logger
 
     private fun libByPrefix(prefix: String): Class<*>? {
         return try {
