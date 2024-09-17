@@ -1,4 +1,4 @@
-package org.medaware.anterogradia.syntax
+package org.medaware.anterogradia.syntax.tokenizer
 
 import org.medaware.anterogradia.exception.ParseException
 
@@ -24,7 +24,7 @@ class Tokenizer(private var inputString: String) {
         val currentChar: Char = this.input.firstOrNull() ?: return Token.undefinedToken(lineNumber)
 
         lastToken =
-            runTokenParsers() ?: throw RuntimeException("Could not parse next token starting with '${currentChar}'")
+            runTokenParsers()
 
         return lastToken
     }

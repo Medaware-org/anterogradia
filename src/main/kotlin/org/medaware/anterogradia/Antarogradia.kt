@@ -1,11 +1,9 @@
 package org.medaware.anterogradia
 
-import org.medaware.anterogradia.syntax.Tokenizer
+import org.medaware.anterogradia.runtime.library.LibraryManager
+import org.medaware.anterogradia.runtime.library.standard.AnterogradiaStandardLibrary
 
 fun main() {
-    val input = "@antg instance section { }"
-    val tok = Tokenizer(input)
-    while (tok.hasNext()) {
-        println(tok.nextToken())
-    }
+    val manager = LibraryManager()
+    manager.register(AnterogradiaStandardLibrary::class.java)
 }

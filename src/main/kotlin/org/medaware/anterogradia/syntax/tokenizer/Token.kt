@@ -1,4 +1,4 @@
-package org.medaware.anterogradia.syntax
+package org.medaware.anterogradia.syntax.tokenizer
 
 class Token(val type: TokenType, val value: String, val line: Int) {
     override fun toString(): String {
@@ -12,19 +12,15 @@ class Token(val type: TokenType, val value: String, val line: Int) {
         return this
     }
 
+    fun compareToken(identifier: String): Boolean {
+        return this.value == identifier && this.type == TokenType.IDENTIFIER
+    }
+
+    fun compareToken(type: TokenType): Boolean {
+        return this.type == type
+    }
+
     companion object {
-        fun compareToken(token: Token?, identifier: String): Boolean {
-            token ?: return false
-
-            return token.value == identifier && token.type == TokenType.IDENTIFIER
-        }
-
-        fun compareToken(token: Token?, type: TokenType): Boolean {
-            token ?: return false
-
-            return token.type == type
-        }
-
         fun undefinedToken(line: Int): Token {
             return Token(TokenType.UNDEFINED, "", line)
         }

@@ -1,4 +1,4 @@
-package org.medaware.anterogradia.syntax
+package org.medaware.anterogradia.syntax.tokenizer
 
 enum class TokenType(val value: String? = null) {
 
