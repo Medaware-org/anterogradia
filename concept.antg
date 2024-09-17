@@ -1,20 +1,7 @@
-@library "org.medaware.anterogradia.libs.HTML"
+@library "org.medaware.anterogradia.libs.MedawareDesignToolkit"
 
-HTML:html {
-    HTML:head {},
-    HTML:body {
-        HTML:div (
-            attributes = HTML:classList { "title-heading" },
-            body = sequence {
-                HTML:h1 (
-                    attributes = nothing(),
-                    body = "Hello, World!"
-                )
-            }
-        ),
-        HTML:h1 (
-            attributes = nothing(),
-            body = "Medaware.org"
-        )
-    }
+mdk:article {
+    mdk:title(str = "Drugs are really fun"),
+    mdk:lead(str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In eget ligula iaculis, tincidunt lacus id, pellentesque erat. Praesent tristique leo eget massa semper, vel venenatis dui tempus. Fusce venenatis sem at leo fringilla, vitae imperdiet est porta. Mauris fermentum feugiat mollis. Vivamus pretium consequat purus eget porttitor. Morbi auctor nunc ac imperdiet ornare. Vestibulum tincidunt lacus sed dignissim"),
+    mdk:banner(src = "https://www.hukins-hops.co.uk/wp-content/uploads/2023/12/are-hops-related-to-weed.jpg")
 }

@@ -27,6 +27,9 @@ class Parser(private val tokenizer: Tokenizer) {
     fun hasNext(): Boolean = currentToken.orNull() != null && nextToken.orNull() != null
 
     fun parseExpression(): Node {
+        if (currentToken.type == TokenType.UNDEFINED)
+            return StringLiteral("")
+
         return when (currentToken.type) {
             TokenType.IDENTIFIER -> parseFunctionCall()
             TokenType.STRING_LITERAL,

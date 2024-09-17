@@ -1,16 +1,12 @@
 package org.medaware.anterogradia.libs
 
-import org.medaware.anterogradia.AnterogradiaResult
+import org.medaware.anterogradia.evalToString
 import org.medaware.anterogradia.padIfNotEmpty
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.DiscreteFunction
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
-import org.medaware.anterogradia.syntax.StringLiteral
-import java.util.Objects
-
-fun Array<Node>.evalToString(runtime: Runtime) = map { it.evaluate(runtime) }.joinToString(separator = "")
 
 @AnterogradiaLibrary(prefix = "HTML")
 class HTML(val runtime: Runtime) {
@@ -33,12 +29,15 @@ class HTML(val runtime: Runtime) {
     fun body(body: Array<Node>): String = tag("body", content = body.evalToString(runtime))
 
     @DiscreteFunction(identifier = "div", params = ["attributes", "body"])
-    fun div(attributes: Node, body: Node): String = tag("div", attrs = attributes.evaluate(runtime), content = body.evaluate(runtime))
+    fun div(attributes: Node, body: Node): String =
+        tag("div", attrs = attributes.evaluate(runtime), content = body.evaluate(runtime))
 
     @DiscreteFunction(identifier = "h1", params = ["attributes", "body"])
-    fun h1(attributes: Node, body: Node): String = tag("h1", attrs = attributes.evaluate(runtime), content = body.evaluate(runtime))
+    fun h1(attributes: Node, body: Node): String =
+        tag("h1", attrs = attributes.evaluate(runtime), content = body.evaluate(runtime))
 
     @VariadicFunction(identifier = "classList")
-    fun classes(classes: Array<Node>): String = "class=\"${classes.map { it.evaluate(runtime) }.joinToString(" ").trim()}\""
+    fun classes(classes: Array<Node>): String =
+        "class=\"${classes.map { it.evaluate(runtime) }.joinToString(" ").trim()}\""
 
 }
