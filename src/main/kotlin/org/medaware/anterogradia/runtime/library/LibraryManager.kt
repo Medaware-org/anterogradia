@@ -122,11 +122,13 @@ class LibraryManager {
              */
 
             val variadicFunctions =
-                lib.declaredMethods.filter { it.name == name }
+                lib.declaredMethods.filter { it.name == name && it.isAnnotationPresent(VariadicFunction::class.java) }
                     .mapNotNull { (it to it.getAnnotation(VariadicFunction::class.java)) }
 
+            val s = if (variadic) " variadic" else ""
+
             if (variadicFunctions.isEmpty())
-                throw FunctionCallException("Could not find variadic function $prefix:'$name' in library '${lib.simpleName}'.")
+                throw FunctionCallException("Could not find$s function $prefix:$name in library '${lib.simpleName}'.")
 
             if (variadicFunctions.size != 1)
                 throw FunctionCallException("There is more than one variadic function of the same name ('${name}'). This should never happen!")
@@ -163,9 +165,9 @@ class LibraryManager {
         }
 
         if (method.size > 1)
-            throw FunctionCallException("There is more than one potential match for function $prefix:'$name':\n$matchesString")
+            throw FunctionCallException("There is more than one potential match for function $prefix:$name:\n$matchesString")
 
-        throw FunctionCallException("Could not find discrete function $prefix:'$name' with the desired number of parameters (${args.size}). Possible matches:\n$matchesString")
+        throw FunctionCallException("Could not find discrete function $prefix:$name with the desired number of parameters (${args.size}). Possible matches:\n$matchesString")
     }
 
     private fun groupParameters(params: HashMap<String, Node>, function: Function): List<Node> {

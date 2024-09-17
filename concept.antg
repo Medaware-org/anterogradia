@@ -1,4 +1,8 @@
 combine {
-    "Hello, World!",
-    "This is a variadic function!"
+    mem:set(key = "abc", value = "I really like donald trump!"),
+    repeat (
+        count = 5,
+        str = mem:get(key = "abc"),
+        separator = " "
+    )
 }

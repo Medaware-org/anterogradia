@@ -7,7 +7,6 @@ import org.medaware.anterogradia.syntax.StringLiteral
 import org.medaware.anterogradia.syntax.tokenizer.Token
 import org.medaware.anterogradia.syntax.tokenizer.TokenType
 import org.medaware.anterogradia.syntax.tokenizer.Tokenizer
-import java.util.*
 
 class Parser(private val tokenizer: Tokenizer) {
 
@@ -50,9 +49,24 @@ class Parser(private val tokenizer: Tokenizer) {
     }
 
     fun parseFunctionCall(): FunctionCall {
-        // Function identifier
         if (!currentToken.compareToken(TokenType.IDENTIFIER))
-            throw ParseException("Could not parse function call: Unexpected token of type ${currentToken.type} found on line ${currentToken.line} in place of the function identifier.")
+            throw ParseException("Could not parse function call: Unexpected token of type ${currentToken.type} found on line ${currentToken.line} in place of the function identifier or library prefix.")
+
+        val libPrefix: String
+
+        // The token could either be a lib prefix or the function identifier
+
+        if (nextToken.compareToken(TokenType.COLON)) {
+            libPrefix = currentToken.value
+
+            consume() // Skip the lib prefix
+
+            if (!nextToken.compareToken(TokenType.IDENTIFIER))
+                throw ParseException("Expected function identifier after lib prefix colon, got ${currentToken.type} on line ${currentToken.line} instead.")
+
+            consume() // Skip ':'
+
+        } else libPrefix = ""
 
         val functionId = currentToken
 
@@ -70,13 +84,16 @@ class Parser(private val tokenizer: Tokenizer) {
         /**
          * The parameters are a comma-separated list of:
          * identifier '=' expr
-         * The parameter list may also be empty
+         * The parameter list may also be empty.
+         * For variadic functions, the parameters are unnamed - effectively
+         * a list of comma-separated expressions.
          */
 
         val params = hashMapOf<String, Node>()
+        var varargCount = 0
 
         if (currentToken.compareToken(closingType))
-            return FunctionCall(functionId, params, variadic = variadic)
+            return FunctionCall(libPrefix, functionId, params, variadic = variadic)
 
         while (true) {
             val paramId: String
@@ -94,7 +111,7 @@ class Parser(private val tokenizer: Tokenizer) {
 
                 consume()
             } else {
-                paramId = UUID.randomUUID().toString()
+                paramId = (varargCount++).toString()
             }
 
             val expr = parseExpression()
@@ -116,7 +133,7 @@ class Parser(private val tokenizer: Tokenizer) {
             break
         }
 
-        return FunctionCall(functionId, params, variadic = variadic)
+        return FunctionCall(libPrefix, functionId, params, variadic = variadic)
     }
 
     companion object {
