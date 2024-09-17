@@ -1,14 +1,20 @@
 @library "org.medaware.anterogradia.libs.Memory"
 
 progn {
-    mem:set(key = "president",
+    mem:set(key = "guest",
             value = random {
-                "Joe Biden",
-                "Donald Trump"
+                "Braun",
+                "Merkel"
             }),
 
-    if (cond =    equal(a = mem:get(key = "president"),
-                        b = "Joe Biden"),
-        then = "Everything will be alright!",
-        else = "We will all die!")
+    sequence {
+        "Hello, ",
+
+        if (cond    =   equal(  a = mem:get(key = "guest"),
+                                b = "Braun"),
+            then    =   "Mr. ",
+            else    =   "Mrs. "),
+
+        mem:get(key = "guest")
+    }
 }
