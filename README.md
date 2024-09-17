@@ -92,7 +92,7 @@ Below is a brief documentation of all the standard lib functions
 
 | random                                                                   | (variadic arguments) |
 |--------------------------------------------------------------------------|----------------------|
-| randomly evaluates one expression from the variadic list and returns it. | /                    |
+| randomly evaluates one expression from the variadic list and returns it. | Expressions          |
 
 ---
 
