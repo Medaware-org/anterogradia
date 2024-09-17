@@ -43,4 +43,18 @@ class Standard(val runtime: Runtime) {
     @VariadicFunction(identifier = "random")
     fun random(strings: Array<Node>): String = strings.random().evaluate(runtime)
 
+    @Function(identifier = "if", params = ["cond", "then", "else"])
+    fun evalIf(str: Node, then: Node, _else: Node): String {
+        val condStr = str.evaluate(runtime)
+
+        if (condStr == "true" || condStr == "yes") {
+            return then.evaluate(runtime)
+        }
+
+        return _else.evaluate(runtime)
+    }
+
+    @Function(identifier = "equal", params = ["a", "b"])
+    fun equal(a: Node, b: Node): String = if (a.evaluate(runtime) == b.evaluate(runtime)) "true" else "false"
+
 }

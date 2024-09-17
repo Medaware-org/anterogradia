@@ -46,6 +46,9 @@ class LibraryManager {
                 if (it.parameters.first().type != Array<Node>::class.java)
                     throw SanityException("Sanity check failed for '${lib.simpleName}': A variadic function is expected to have a parameter of type Array<Node>, got ${it.parameters.first().type.simpleName}")
 
+                if (it.returnType != String::class.java)
+                    throw SanityException("Sanity check failed for '${lib.simpleName}': Variadic function '${variadic.identifier}' is expected to have the return type String, got ${it.returnType.simpleName}.")
+
                 registeredFunctions.add(variadic.identifier to null)
 
                 return@forEach
