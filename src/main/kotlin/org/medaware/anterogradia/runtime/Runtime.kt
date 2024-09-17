@@ -13,6 +13,6 @@ class Runtime {
     }
 
     fun callFunction(call: FunctionCall): String =
-        libManager.invokeLibMethod("", call.identifier.value, call.arguments, this)
+        libManager.invokeLibMethod("", call.identifier.value, call.arguments, this, variadic = call.variadic)
 
 }

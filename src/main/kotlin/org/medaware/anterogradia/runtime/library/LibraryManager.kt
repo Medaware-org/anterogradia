@@ -22,7 +22,7 @@ class LibraryManager {
     }
 
     private fun libSanityCheck(lib: Class<*>) {
-        val registeredFunctions = mutableSetOf<Pair<String, Int>>()
+        val registeredFunctions = mutableSetOf<Pair<String, Int?>>()
 
         try {
             lib.getConstructor()
@@ -31,6 +31,30 @@ class LibraryManager {
         }
 
         lib.declaredMethods.forEach {
+
+            /**
+             * Handle variadic functions
+             */
+
+            it.getAnnotation(VariadicFunction::class.java)?.let { variadic ->
+                if (registeredFunctions.any { it.first == variadic.identifier })
+                    throw SanityException("Sanity check failed for '${lib.simpleName}': A variadic function must never co-exist with another function of the same name. Failed on variadic function '${variadic.identifier}'")
+
+                if (it.parameters.size != 1)
+                    throw SanityException("Sanity check failed for '${lib.simpleName}': A variadic function is expected to have a single string array parameter.")
+
+                if (it.parameters.first().type != Array<String>::class.java)
+                    throw SanityException("Sanity check failed for '${lib.simpleName}': A variadic function is expected to have a parameter of type Array<String>, got ${it.parameters.first().type.simpleName}")
+
+                registeredFunctions.add(variadic.identifier to null)
+
+                return@forEach
+            }
+
+            /**
+             * Regular (discrete) functions
+             */
+
             val function = it.getAnnotation(Function::class.java) ?: return@forEach
 
             if (it.returnType != String::class.java)
@@ -44,6 +68,9 @@ class LibraryManager {
                     throw SanityException("Sanity check failed for '${lib.simpleName}': Parameter names of function '${function.identifier}' (${it.name}) overlap on parameter '${it}'.")
                 params.add(paramId)
             }
+
+            if (registeredFunctions.any { it.first == function.identifier && it.second == null })
+                throw SanityException("Sanity check failed for '${lib.simpleName}': A discrete function may not co-exist with a variadic function. Failed on discrete function '${function.identifier}'.")
 
             if (!registeredFunctions.add(function.identifier to params.size))
                 throw SanityException("Sanity check failed for '${lib.simpleName}': Function name and parameter count overlaps for function '${function.identifier}' (${it.name}).")
@@ -75,15 +102,43 @@ class LibraryManager {
         logger.info("Successfully registered library '${libClass.simpleName}' with prefix '${lib.prefix}'.")
     }
 
-    fun invokeLibMethod(prefix: String, name: String, args: HashMap<String, Node>, runtime: Runtime): String {
+    fun invokeLibMethod(
+        prefix: String,
+        name: String,
+        args: HashMap<String, Node>,
+        runtime: Runtime,
+        variadic: Boolean
+    ): String {
         val lib =
             libByPrefix(prefix) ?: throw FunctionCallException("Could not find any library with prefix '$prefix'.")
 
-        val methods = lib.declaredMethods.filter { it.getAnnotation(Function::class.java)?.identifier == name }
-            .map { (it to it.getAnnotation(Function::class.java)) }
+        val rawMethods = lib.declaredMethods.filter { it.getAnnotation(Function::class.java)?.identifier == name }
 
-        if (methods.isEmpty())
-            throw FunctionCallException("Could not find function $prefix:'$name' in library '${lib.simpleName}'.")
+        val methods = rawMethods.map { (it to it.getAnnotation(Function::class.java)) }
+
+        if (methods.isEmpty()) {
+            /**
+             * Variadic functions
+             */
+
+            val variadicFunctions =
+                lib.declaredMethods.filter { it.name == name }
+                    .mapNotNull { (it to it.getAnnotation(VariadicFunction::class.java)) }
+
+            if (variadicFunctions.isEmpty())
+                throw FunctionCallException("Could not find variadic function $prefix:'$name' in library '${lib.simpleName}'.")
+
+            if (variadicFunctions.size != 1)
+                throw FunctionCallException("There is more than one variadic function of the same name ('${name}'). This should never happen!")
+
+            val params = args.values.map { it.evaluate(runtime) }.toTypedArray()
+            val instance = lib.getConstructor().newInstance()
+
+            return variadicFunctions.first().first.invoke(instance, params) as String
+        }
+
+        if (variadic)
+            throw FunctionCallException("Attempted to call discrete function '$name' as a variadic function.")
 
         // At this point, 'methods' contains multiple potential matches for the desired function.
         // We need to narrow it down further with the help of the parameters.
@@ -110,7 +165,7 @@ class LibraryManager {
         if (method.size > 1)
             throw FunctionCallException("There is more than one potential match for function $prefix:'$name':\n$matchesString")
 
-        throw FunctionCallException("Could not find function $prefix:'$name' with the desired number of parameters (${args.size}). Possible matches:\n$matchesString")
+        throw FunctionCallException("Could not find discrete function $prefix:'$name' with the desired number of parameters (${args.size}). Possible matches:\n$matchesString")
     }
 
     private fun groupParameters(params: HashMap<String, Node>, function: Function): List<Node> {

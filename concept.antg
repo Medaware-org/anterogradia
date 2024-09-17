@@ -1,8 +1,4 @@
-div (
-    attributes = "",
-    html = div (
-        attributes = "",
-        html = "<a>Hello, World!</a>"
-    )
-)
-
+combine {
+    "Hello, World!",
+    "This is a variadic function!"
+}

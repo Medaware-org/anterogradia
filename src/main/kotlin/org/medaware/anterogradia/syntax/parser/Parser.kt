@@ -7,6 +7,7 @@ import org.medaware.anterogradia.syntax.StringLiteral
 import org.medaware.anterogradia.syntax.tokenizer.Token
 import org.medaware.anterogradia.syntax.tokenizer.TokenType
 import org.medaware.anterogradia.syntax.tokenizer.Tokenizer
+import java.util.*
 
 class Parser(private val tokenizer: Tokenizer) {
 
@@ -57,8 +58,12 @@ class Parser(private val tokenizer: Tokenizer) {
 
         consume()
 
-        if (!currentToken.compareToken(TokenType.LPAREN))
-            throw ParseException("Could not parse function call: Expected '(' after function identifier, got ${currentToken.type} on line ${currentToken.line}.")
+        if (!currentToken.compareToken(TokenType.LPAREN) && !currentToken.compareToken(TokenType.LCURLY))
+            throw ParseException("Could not parse function call: Expected '(' or '{' after function identifier, got ${currentToken.type} on line ${currentToken.line}.")
+
+        val variadic: Boolean = currentToken.type == TokenType.LCURLY
+        val closingType = if (currentToken.type == TokenType.LPAREN) TokenType.RPAREN else TokenType.RCURLY
+        val closingChar = if (closingType == TokenType.RPAREN) ')' else '}'
 
         consume()
 
@@ -70,21 +75,27 @@ class Parser(private val tokenizer: Tokenizer) {
 
         val params = hashMapOf<String, Node>()
 
-        if (currentToken.compareToken(TokenType.RPAREN))
-            return FunctionCall(functionId, params)
+        if (currentToken.compareToken(closingType))
+            return FunctionCall(functionId, params, variadic = variadic)
 
         while (true) {
-            if (!currentToken.compareToken(TokenType.IDENTIFIER) || !nextToken.compareToken(TokenType.EQUALS))
-                throw ParseException("Could not parse function call: Expected parameter identifier, got ${currentToken.type} on line ${currentToken.line}.")
+            val paramId: String
 
-            val paramId = currentToken.value
+            if (!variadic) {
+                if (!currentToken.compareToken(TokenType.IDENTIFIER) || !nextToken.compareToken(TokenType.EQUALS))
+                    throw ParseException("Could not parse function call: Expected parameter identifier, got ${currentToken.type} on line ${currentToken.line}.")
 
-            consume()
+                paramId = currentToken.value
 
-            if (!currentToken.compareToken(TokenType.EQUALS))
-                throw ParseException("Could not parse function call: Expected '=' after parameter identifier '$paramId', got ${currentToken.type} on line ${currentToken.line}.")
+                consume()
 
-            consume()
+                if (!currentToken.compareToken(TokenType.EQUALS))
+                    throw ParseException("Could not parse function call: Expected '=' after parameter identifier '$paramId', got ${currentToken.type} on line ${currentToken.line}.")
+
+                consume()
+            } else {
+                paramId = UUID.randomUUID().toString()
+            }
 
             val expr = parseExpression()
 
@@ -98,14 +109,14 @@ class Parser(private val tokenizer: Tokenizer) {
                 continue
             }
 
-            if (!currentToken.compareToken(TokenType.RPAREN))
-                throw ParseException("Could not parse function call: Expected ')' or ',' and more parameters, got ${currentToken.type} on line ${currentToken.line}.")
+            if (!currentToken.compareToken(closingType))
+                throw ParseException("Could not parse function call: Expected '$closingChar' or ',' and more parameters, got ${currentToken.type} on line ${currentToken.line}.")
 
-            consume() // Skip ')'
+            consume() // Skip ')' or '}'
             break
         }
 
-        return FunctionCall(functionId, params)
+        return FunctionCall(functionId, params, variadic = variadic)
     }
 
     companion object {
