@@ -1,14 +1,20 @@
-package org.medaware.anterogradia.runtime.library.standard
+package org.medaware.anterogradia.libs
 
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.Function
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 
 @AnterogradiaLibrary
-class AnterogradiaStandardLibrary {
+class Standard {
 
-    @VariadicFunction(identifier = "combine")
-    fun combine(params: Array<String>) = params.joinToString(separator = "")
+    @VariadicFunction(identifier = "sequence")
+    fun sequence(params: Array<String>) = params.joinToString(separator = "")
+
+    @VariadicFunction(identifier = "progn")
+    fun progn(params: Array<String>) = params.last()
+
+    @Function(identifier = "nothing")
+    fun nothing(): String = ""
 
     @Function(identifier = "repeat", params = ["count", "str"])
     fun repeat(count: String, str: String) = try {

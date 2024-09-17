@@ -1,8 +1,8 @@
 package org.medaware.anterogradia.runtime
 
+import org.medaware.anterogradia.Anterogradia
+import org.medaware.anterogradia.libs.Standard
 import org.medaware.anterogradia.runtime.library.LibraryManager
-import org.medaware.anterogradia.runtime.library.memory.AnterogradiaMemoryLibrary
-import org.medaware.anterogradia.runtime.library.standard.AnterogradiaStandardLibrary
 import org.medaware.anterogradia.syntax.FunctionCall
 
 class Runtime {
@@ -10,8 +10,17 @@ class Runtime {
     private val libManager = LibraryManager()
 
     init {
-        libManager.register(AnterogradiaStandardLibrary::class.java)
-        libManager.register(AnterogradiaMemoryLibrary::class.java)
+        libManager.register(Standard::class.java)
+        Anterogradia.logger.info("Runtime startup OK.")
+    }
+
+    fun loadLibrary(path: String) {
+        val libClass = Class.forName(path)
+        if (libManager.isLibLoaded(libClass)) {
+            Anterogradia.logger.info("Library class '${libClass.canonicalName}' is already loaded. Skipping.")
+            return
+        }
+        libManager.register(libClass)
     }
 
     fun callFunction(call: FunctionCall): String =

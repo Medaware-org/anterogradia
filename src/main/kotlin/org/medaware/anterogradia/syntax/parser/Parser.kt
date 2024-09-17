@@ -3,6 +3,7 @@ package org.medaware.anterogradia.syntax.parser
 import org.medaware.anterogradia.exception.ParseException
 import org.medaware.anterogradia.syntax.FunctionCall
 import org.medaware.anterogradia.syntax.Node
+import org.medaware.anterogradia.syntax.Script
 import org.medaware.anterogradia.syntax.StringLiteral
 import org.medaware.anterogradia.syntax.tokenizer.Token
 import org.medaware.anterogradia.syntax.tokenizer.TokenType
@@ -48,6 +49,27 @@ class Parser(private val tokenizer: Tokenizer) {
         return StringLiteral(value)
     }
 
+    fun parseLoadInstruction(): String? {
+        if (!currentToken.compareToken(TokenType.AT))
+            return null // We don't just throw an exception here because we want this operation to be non-invasive
+
+        consume()
+
+        if (!currentToken.compareToken("library"))
+            throw ParseException("Expected 'library' keyword after the '@' prefix, got ${currentToken.type} on line ${currentToken.line}.")
+
+        consume()
+
+        if (currentToken.type != TokenType.STRING_LITERAL)
+            throw ParseException("Expected string literal (library path) after the 'library' keyword, got ${currentToken.type} on line ${currentToken.line}.")
+
+        val path = currentToken.value
+
+        consume()
+
+        return path
+    }
+
     fun parseFunctionCall(): FunctionCall {
         if (!currentToken.compareToken(TokenType.IDENTIFIER))
             throw ParseException("Could not parse function call: Unexpected token of type ${currentToken.type} found on line ${currentToken.line} in place of the function identifier or library prefix.")
@@ -79,6 +101,10 @@ class Parser(private val tokenizer: Tokenizer) {
         val closingType = if (currentToken.type == TokenType.LPAREN) TokenType.RPAREN else TokenType.RCURLY
         val closingChar = if (closingType == TokenType.RPAREN) ')' else '}'
 
+        if (functionId.value == "nothing") {
+            println()
+        }
+
         consume()
 
         /**
@@ -92,8 +118,10 @@ class Parser(private val tokenizer: Tokenizer) {
         val params = hashMapOf<String, Node>()
         var varargCount = 0
 
-        if (currentToken.compareToken(closingType))
+        if (currentToken.compareToken(closingType)) {
+            consume() // Skip the closing token
             return FunctionCall(libPrefix, functionId, params, variadic = variadic)
+        }
 
         while (true) {
             val paramId: String
@@ -137,7 +165,16 @@ class Parser(private val tokenizer: Tokenizer) {
     }
 
     companion object {
-        fun parseScript(str: String): Node = Parser(Tokenizer(str)).parseExpression()
+        fun parseScript(str: String): Script {
+            val parser = Parser(Tokenizer(str))
+            val libs = mutableListOf<String>()
+            while (true) {
+                val lib = parser.parseLoadInstruction() ?: break
+                libs.add(lib)
+            }
+            val expr = parser.parseExpression()
+            return Script(libs, expr)
+        }
     }
 
 }

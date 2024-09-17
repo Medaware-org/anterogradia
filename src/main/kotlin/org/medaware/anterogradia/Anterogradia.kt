@@ -36,9 +36,9 @@ object Anterogradia {
         var except: Exception? = null
 
         try {
-            result = Parser
-                .parseScript(input)
-                .evaluate(runtime)
+            val script = Parser.parseScript(input)
+            script.libs.forEach(runtime::loadLibrary)
+            result = script.expression.evaluate(runtime)
         } catch (e: Exception) {
             except = e
             result = ""
@@ -53,7 +53,11 @@ fun main() {
     val input = Files.readString(Path.of("concept.antg"))
 
     Anterogradia.invokeCompiler(input).use { input, output, except ->
-        println(output)
+        if (except != null) {
+            except.printStackTrace()
+        } else {
+            println(output)
+        }
     }
 
 }

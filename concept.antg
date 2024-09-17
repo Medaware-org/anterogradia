@@ -1,8 +1,11 @@
-combine {
+@library "org.medaware.anterogradia.libs.Memory"
+
+progn {
     mem:set(key = "abc", value = "I really like donald trump!"),
     repeat (
         count = 5,
         str = mem:get(key = "abc"),
         separator = " "
-    )
+    ),
+    nothing()
 }

@@ -3,6 +3,8 @@ package org.medaware.anterogradia.syntax
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.syntax.tokenizer.Token
 
+data class Script(val libs: List<String>, val expression: Node)
+
 sealed class Node {
     abstract fun evaluate(runtime: Runtime): String
 }

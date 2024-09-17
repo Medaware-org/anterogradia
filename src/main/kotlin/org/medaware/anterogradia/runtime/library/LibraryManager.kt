@@ -87,7 +87,7 @@ class LibraryManager {
 
     fun register(libClass: Class<*>) {
         val lib = libClass.getAnnotation(AnterogradiaLibrary::class.java)
-            ?: throw LibraryException("Failed to register library class '${libClass.simpleName}'. Class is not annotated with '@AnterogradiaLibrary'.")
+            ?: throw LibraryException("Failed to register library class '${libClass.canonicalName}'. Class is not annotated with '@AnterogradiaLibrary'.")
 
         val conflict = libByPrefix(lib.prefix)
 
@@ -184,6 +184,10 @@ class LibraryManager {
         }
 
         return result
+    }
+
+    fun isLibLoaded(libClass: Class<*>): Boolean {
+        return this.libraries.contains(libClass)
     }
 
 }
