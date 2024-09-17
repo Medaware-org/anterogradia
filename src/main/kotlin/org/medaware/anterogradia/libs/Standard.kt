@@ -9,6 +9,9 @@ import org.medaware.anterogradia.syntax.Node
 @AnterogradiaLibrary
 class Standard(val runtime: Runtime) {
 
+    @Function(identifier = "about")
+    fun about(): String = "Anterogradia Standard Library\n{C} 2024 Medaware\n"
+
     @VariadicFunction(identifier = "sequence")
     fun sequence(params: Array<Node>) = params.joinToString(separator = "") { it.evaluate(runtime) }
 

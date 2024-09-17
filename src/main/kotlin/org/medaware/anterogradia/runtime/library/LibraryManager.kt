@@ -30,7 +30,14 @@ class LibraryManager {
             throw SanityException("Sanity check failed for '${lib.simpleName}': The class is expected to have a constructor with only a runtime parameter.")
         }
 
+        // Require all libraries to have an "about" function
+        lib.declaredMethods.find { it.isAnnotationPresent(Function::class.java) && it.getAnnotation(Function::class.java).identifier == "about" }
+            ?: throw SanityException("Sanity check failed for '${lib.simpleName}': Each library is expected to have a parameter-less discrete 'about' function.")
+
         lib.declaredMethods.forEach {
+
+            if (it.isAnnotationPresent(Function::class.java) && it.isAnnotationPresent(VariadicFunction::class.java))
+                throw SanityException("Sanity check failed for '${lib.simpleName}': A function must not be annotated with both @VariadicFunction and @Function at the same time.")
 
             /**
              * Handle variadic functions

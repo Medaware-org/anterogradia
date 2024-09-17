@@ -12,6 +12,9 @@ class Memory(val runtime: Runtime) {
         private val variables: HashMap<String, String> = hashMapOf()
     }
 
+    @Function(identifier = "about")
+    fun about(): String = "Anterogradia Memory Library\n{C} 2024 Medaware\n"
+
     @Function(identifier = "set", params = ["key", "value"])
     fun setVariable(key: Node, value: Node): String {
         variables[key.evaluate(runtime)] = value.evaluate(runtime)
