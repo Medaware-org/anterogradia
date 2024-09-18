@@ -35,7 +35,7 @@ class Parser(private val tokenizer: Tokenizer) {
             TokenType.STRING_LITERAL,
             TokenType.NUMBER_LITERAL -> parseStringLiteral()
 
-            else -> throw ParseException("Could not parse expression: Unknown expression starting with token of type ${currentToken.type} on line ${currentToken.line}.")
+            else -> throw ParseException("Could not parse expression: Unknown expression starting with token of type ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
         }
     }
 
@@ -135,7 +135,7 @@ class Parser(private val tokenizer: Tokenizer) {
             TokenType.STRING_LITERAL,
             TokenType.NUMBER_LITERAL -> currentToken.value
 
-            else -> throw ParseException("Could not parse string literal from token of type ${currentToken.type} on line ${currentToken.line}.")
+            else -> throw ParseException("Could not parse string literal from token of type ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
         }
 
         consume()
@@ -150,12 +150,12 @@ class Parser(private val tokenizer: Tokenizer) {
         consume()
 
         if (!currentToken.compareToken("library"))
-            throw ParseException("Expected 'library' keyword after the '@' prefix, got ${currentToken.type} on line ${currentToken.line}.")
+            throw ParseException("Expected 'library' keyword after the '@' prefix, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
         consume()
 
         if (currentToken.type != TokenType.STRING_LITERAL)
-            throw ParseException("Expected string literal (library path) after the 'library' keyword, got ${currentToken.type} on line ${currentToken.line}.")
+            throw ParseException("Expected string literal (library path) after the 'library' keyword, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
         val path = currentToken.value
 
@@ -166,7 +166,7 @@ class Parser(private val tokenizer: Tokenizer) {
 
     fun parseFunctionCall(): FunctionCall {
         if (!currentToken.compareToken(TokenType.IDENTIFIER))
-            throw ParseException("Could not parse function call: Unexpected token of type ${currentToken.type} found on line ${currentToken.line} in place of the function identifier or library prefix.")
+            throw ParseException("Could not parse function call: Unexpected token of type ${currentToken.type} \"${currentToken.value}\" found on line ${currentToken.line} in place of the function identifier or library prefix.")
 
         val libPrefix: String
 
@@ -178,7 +178,7 @@ class Parser(private val tokenizer: Tokenizer) {
             consume() // Skip the lib prefix
 
             if (!nextToken.compareToken(TokenType.IDENTIFIER))
-                throw ParseException("Expected function identifier after lib prefix colon, got ${currentToken.type} on line ${currentToken.line} instead.")
+                throw ParseException("Expected function identifier after lib prefix colon, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line} instead.")
 
             consume() // Skip ':'
 
@@ -189,7 +189,7 @@ class Parser(private val tokenizer: Tokenizer) {
         consume()
 
         if (!currentToken.compareToken(TokenType.LPAREN) && !currentToken.compareToken(TokenType.LCURLY))
-            throw ParseException("Could not parse function call: Expected '(' or '{' after function identifier, got ${currentToken.type} on line ${currentToken.line}.")
+            throw ParseException("Could not parse function call: Expected '(' or '{' after function identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
         val variadic: Boolean = currentToken.type == TokenType.LCURLY
         val closingType = if (currentToken.type == TokenType.LPAREN) TokenType.RPAREN else TokenType.RCURLY
@@ -218,14 +218,14 @@ class Parser(private val tokenizer: Tokenizer) {
 
             if (!variadic) {
                 if (!currentToken.compareToken(TokenType.IDENTIFIER) || !nextToken.compareToken(TokenType.EQUALS))
-                    throw ParseException("Could not parse function call: Expected parameter identifier, got ${currentToken.type} on line ${currentToken.line}.")
+                    throw ParseException("Could not parse function call: Expected parameter identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
                 paramId = currentToken.value
 
                 consume()
 
                 if (!currentToken.compareToken(TokenType.EQUALS))
-                    throw ParseException("Could not parse function call: Expected '=' after parameter identifier '$paramId', got ${currentToken.type} on line ${currentToken.line}.")
+                    throw ParseException("Could not parse function call: Expected '=' after parameter identifier '$paramId', got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
                 consume()
             } else {
@@ -245,7 +245,7 @@ class Parser(private val tokenizer: Tokenizer) {
             }
 
             if (!currentToken.compareToken(closingType))
-                throw ParseException("Could not parse function call: Expected '$closingChar' or ',' and more parameters, got ${currentToken.type} on line ${currentToken.line}.")
+                throw ParseException("Could not parse function call: Expected '$closingChar' or ',' and more parameters, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
             consume() // Skip ')' or '}'
             break

@@ -1,6 +1,5 @@
 package org.medaware.anterogradia
 
-import com.google.gson.GsonBuilder
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.syntax.parser.Parser
 import java.nio.file.Files
