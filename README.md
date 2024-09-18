@@ -139,6 +139,8 @@ Below is a brief documentation of all the standard lib functions
 
 ### equal
 
+> :warning: *Syntax binding available*
+
 | equal                                                 | a          | b          |
 |-------------------------------------------------------|------------|------------|
 | Evaluates to "true" if 'a' == 'b'. Otherwise "false". | Expression | Expression |
