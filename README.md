@@ -5,17 +5,16 @@ A markup system for the Medaware platform
 ## Example Program
 
 ```js
-@library "org.medaware.anterogradia.libs.Memory"
-
 progn {
-   mem:set(key = "guest", value = random {"Braun", "Merkel"}),
+   "guest" := random {"Braun", "Merkel"},
    sequence {
       "Hello, ",
-      if (    cond = equal(  a = mem:get(key = "guest"), 
-              b = "Braun"),
-              then = "Mr. ",
-              else = "Mrs. "),
-      mem:get(key = "guest")
+      if (&"guest" = "Braun") {
+         "Mr "
+      } else {
+         "Mrs. "
+      },
+      &"guest", "!"
    }
 }
 ```
@@ -153,6 +152,26 @@ Below is a brief documentation of all the standard lib functions
 |--------------------------------------|---------------|
 | Retrieve a runtime startup parameter | Parameter key |
 
+---
+
+### set
+
+> :warning: *Syntax binding available*
+
+| set                            | key           | value            |
+|--------------------------------|---------------|------------------|
+| Sets or creates a new variable | variable name | value expression |
+
+---
+
+### get
+
+> :warning: *Syntax binding available*
+
+| get                                         | key           |
+|---------------------------------------------|---------------|
+| Retrieves the value of an existing variable | variable name |
+
 
 ## Syntax bindings
 
@@ -161,7 +180,6 @@ Despite not looking like it, syntactical bindings still utilize the function inf
 calls. Think of them as glorified preprocessors. Below is a list of all such bindings available as of writing this entry.
 
 ### Conditional Statement
-
 Old function form
 ```
 if (condition, then-block, else-block)
@@ -175,11 +193,31 @@ if ( condition ) { then-block } else { else-block }
 The original `if` function has been renamed to `_if`.
 
 ### Comparison
-Old function form
+Function form
 ```
 equal ( left, right )
 ```
 has an alternate form of
 ```
 left = right
+```
+
+## Setting a variable
+Function form
+```
+set (key, value)
+```
+Syntax binding
+```
+key := value
+```
+
+## Retrieving a variable
+Function form
+```
+get (key)
+```
+Syntax binding
+```
+& key
 ```

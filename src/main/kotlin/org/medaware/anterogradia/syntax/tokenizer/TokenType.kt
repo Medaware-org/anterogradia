@@ -26,6 +26,7 @@ enum class TokenType(val value: String? = null) {
     SEMICOLON(";"),
     COLON(":"),
     DOLLARSIGN("$"),
+    AMPERSAND("&"),
     EQUALS("="),
     VBAR("|"),
     HAT("^"),
@@ -34,8 +35,7 @@ enum class TokenType(val value: String? = null) {
     EXCLAMATION("!"),
 
     // Complex tokens
-    POINT_RIGHT("->"),
-    APPROACHES("-->");
+    ASSIGN_RIGHT(":=");
 }
 
 fun findMatchingType(str: String): TokenType? {

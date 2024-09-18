@@ -9,6 +9,10 @@ import org.medaware.anterogradia.syntax.Node
 @AnterogradiaLibrary
 class Standard(val runtime: Runtime) {
 
+    companion object {
+        private val variableStore = hashMapOf<String, String>()
+    }
+
     @DiscreteFunction(identifier = "about")
     fun about(): String = "Anterogradia Standard Library\n{C} Medaware, 2024\n"
 
@@ -62,5 +66,14 @@ class Standard(val runtime: Runtime) {
 
     @DiscreteFunction(identifier = "param", params = ["key"])
     fun parameter(id: Node): String = runtime.parameters[id.evaluate(runtime)] ?: ""
+
+    @DiscreteFunction(identifier = "set", params = ["key", "value"])
+    fun set(key: Node, value: Node): String {
+        variableStore[key.evaluate(runtime)] = value.evaluate(runtime)
+        return ""
+    }
+
+    @DiscreteFunction(identifier = "get", params = ["key"])
+    fun set(key: Node): String = variableStore[key.evaluate(runtime)] ?: ""
 
 }

@@ -30,22 +30,35 @@ class Parser(private val tokenizer: Tokenizer) {
         if (currentToken.type == TokenType.UNDEFINED)
             return StringLiteral("")
 
-        return parseBindings() ?: when (currentToken.type) {
+        val getBinding = (currentToken.type == TokenType.AMPERSAND)
+
+        if (getBinding)
+            consume() // '&'
+
+        val expr = parseBindings() ?: when (currentToken.type) {
             TokenType.IDENTIFIER -> parseFunctionCall()
             TokenType.STRING_LITERAL,
             TokenType.NUMBER_LITERAL -> parseStringLiteral()
 
             else -> throw ParseException("Could not parse expression: Unknown expression starting with token of type ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
         }
+
+        return if (getBinding) FunctionCall("", "get", hashMapOf("key" to expr), false) else expr
     }
 
     fun parseExpression(): Node {
         val left = parseSimpleExpression()
 
+        // Comparison binding
         if (currentToken.compareToken(TokenType.EQUALS)) {
             consume() // '='
-
             return FunctionCall("", "equal", hashMapOf("a" to left, "b" to parseSimpleExpression()), false)
+        }
+
+        // Variable assignment
+        if (currentToken.compareToken(TokenType.ASSIGN_RIGHT)) {
+            consume() // ':='
+            return FunctionCall("", "set", hashMapOf("key" to left, "value" to parseSimpleExpression()), false)
         }
 
         return left
@@ -201,7 +214,7 @@ class Parser(private val tokenizer: Tokenizer) {
         consume()
 
         if (!currentToken.compareToken(TokenType.LPAREN) && !currentToken.compareToken(TokenType.LCURLY))
-            throw ParseException("Could not parse function call: Expected '(' or '{' after function identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+            throw ParseException("Could not parse function call of \"$functionId\": Expected '(' or '{' after function identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
         val variadic: Boolean = currentToken.type == TokenType.LCURLY
         val closingType = if (currentToken.type == TokenType.LPAREN) TokenType.RPAREN else TokenType.RCURLY
