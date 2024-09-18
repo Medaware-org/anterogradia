@@ -149,7 +149,7 @@ class LibraryManager {
                 throw FunctionCallException("There is more than one variadic function of the same name ('${name}'). This should never happen!")
 
             val params = args.values.toTypedArray()
-            val instance = lib.getConstructor(Runtime::class.java).newInstance(runtime)
+            val instance = runtime.libInstance(lib)
 
             return variadicFunctions.first().first.invoke(instance, params) as String
         }
@@ -171,7 +171,7 @@ class LibraryManager {
 
         if (method.size == 1) {
             val groupedParams = groupParameters(args, method.first().second).toTypedArray()
-            val instance = lib.getConstructor(Runtime::class.java).newInstance(runtime)
+            val instance = runtime.libInstance(lib)
             if (groupedParams.isNotEmpty())
                 return method.first().first.invoke(instance, *groupedParams) as String
             return method.first().first.invoke(instance) as String
