@@ -23,6 +23,6 @@ class Runtime(val parameters: HashMap<String, String> = hashMapOf()) {
     }
 
     fun callFunction(call: FunctionCall): String =
-        libManager.invokeLibMethod(call.prefix, call.identifier.value, call.arguments, this, variadic = call.variadic)
+        libManager.invokeLibMethod(call.prefix, call.identifier, call.arguments, this, variadic = call.variadic)
 
 }

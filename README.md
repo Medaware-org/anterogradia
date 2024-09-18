@@ -127,7 +127,9 @@ Below is a brief documentation of all the standard lib functions
 
 ---
 
-### if
+### _if
+
+> :warning: *Superseded by the if construct*
 
 | if                                                                | cond                                                  | then       | else       |
 |-------------------------------------------------------------------|-------------------------------------------------------|------------|------------|

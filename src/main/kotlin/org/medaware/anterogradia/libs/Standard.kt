@@ -46,7 +46,7 @@ class Standard(val runtime: Runtime) {
     @VariadicFunction(identifier = "random")
     fun random(strings: Array<Node>): String = strings.random().evaluate(runtime)
 
-    @DiscreteFunction(identifier = "if", params = ["cond", "then", "else"])
+    @DiscreteFunction(identifier = "_if", params = ["cond", "then", "else"])
     fun evalIf(str: Node, then: Node, _else: Node): String {
         val condStr = str.evaluate(runtime)
 
