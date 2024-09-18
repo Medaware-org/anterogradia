@@ -155,7 +155,8 @@ Below is a brief documentation of all the standard lib functions
 ## Syntax bindings
 
 To improve developer experience, some functions or expressions can be written in the form of dedicated syntactical entities.
-Below is a list of all such bindings available as of writing this entry.
+Despite not looking like it, syntactical bindings still utilize the function infrastructure of ANTG and thus evaluate to function
+calls. Think of them as glorified preprocessors. Below is a list of all such bindings available as of writing this entry.
 
 ### Conditional Statement
 
