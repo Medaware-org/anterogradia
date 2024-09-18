@@ -3,15 +3,14 @@ package org.medaware.anterogradia.libs
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.DiscreteFunction
+import org.medaware.anterogradia.runtime.library.StateRetention
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
 
-@AnterogradiaLibrary
+@AnterogradiaLibrary(stateRetention = StateRetention.STATEFUL)
 class Standard(val runtime: Runtime) {
 
-    companion object {
-        private val variableStore = hashMapOf<String, String>()
-    }
+    private val variableStore = hashMapOf<String, String>()
 
     @DiscreteFunction(identifier = "about")
     fun about(): String = "Anterogradia Standard Library\n{C} Medaware, 2024\n"
