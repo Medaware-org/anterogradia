@@ -30,16 +30,32 @@ class Parser(private val tokenizer: Tokenizer) {
         if (currentToken.type == TokenType.UNDEFINED)
             return StringLiteral("")
 
-        if (currentToken.compareToken("if"))
-            return parseIfConstruct()
-
-        return when (currentToken.type) {
+        return parseBindings() ?: when (currentToken.type) {
             TokenType.IDENTIFIER -> parseFunctionCall()
             TokenType.STRING_LITERAL,
             TokenType.NUMBER_LITERAL -> parseStringLiteral()
 
             else -> throw ParseException("Could not parse expression: Unknown expression starting with token of type ${currentToken.type} on line ${currentToken.line}.")
         }
+    }
+
+    fun parseBindings(): Node? {
+        if (currentToken.compareToken("if"))
+            return parseIfConstruct()
+
+        var result: Node? = null
+
+        if (currentToken.compareToken("true"))
+            result = StringLiteral("true")
+        else if (currentToken.compareToken("false"))
+            result = StringLiteral("false")
+
+        if (result != null) {
+            consume()
+            return result
+        }
+
+        return null
     }
 
     fun parseIfConstruct(): FunctionCall {

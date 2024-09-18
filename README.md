@@ -131,9 +131,9 @@ Below is a brief documentation of all the standard lib functions
 
 > :warning: *Superseded by the if construct*
 
-| if                                                                | cond                                                  | then       | else       |
-|-------------------------------------------------------------------|-------------------------------------------------------|------------|------------|
-| Evaluates 'then' if 'cond' is "true", otherwise evaluates 'else'. | "true" or "yes" for true. Otherwise considered false. | Expression | Expression |
+| _if                                                             | cond                                                  | then       | else       |
+|-----------------------------------------------------------------|-------------------------------------------------------|------------|------------|
+| Evaluates 'then' if 'cond' is true, otherwise evaluates 'else'. | "true" or "yes" for true. Otherwise considered false. | Expression | Expression |
 
 ---
 
@@ -150,3 +150,23 @@ Below is a brief documentation of all the standard lib functions
 | param                                | key           |
 |--------------------------------------|---------------|
 | Retrieve a runtime startup parameter | Parameter key |
+
+
+## Syntax bindings
+
+To improve developer experience, some functions or expressions can be written in the form of dedicated syntactical entities.
+Below is a list of all such bindings available as of writing this entry.
+
+### Conditional Statement
+
+Old function form
+```
+if (condition, then-block, else-block)
+```
+
+can ba rewritten as a construct
+```
+if ( condition ) { then-block } else { else-block }
+```
+
+The original `if` function has been renamed to `_if`.
