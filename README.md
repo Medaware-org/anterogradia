@@ -202,7 +202,7 @@ has an alternate form of
 left = right
 ```
 
-## Setting a variable
+### Setting a variable
 Function form
 ```
 set (key, value)
@@ -212,7 +212,7 @@ Syntax binding
 key := value
 ```
 
-## Retrieving a variable
+### Retrieving a variable
 Function form
 ```
 get (key)
