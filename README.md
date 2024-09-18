@@ -171,3 +171,13 @@ if ( condition ) { then-block } else { else-block }
 ```
 
 The original `if` function has been renamed to `_if`.
+
+### Comparison
+Old function form
+```
+equal ( left, right )
+```
+has an alternate form of
+```
+left = right
+```

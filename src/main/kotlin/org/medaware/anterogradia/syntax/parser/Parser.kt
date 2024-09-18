@@ -26,7 +26,7 @@ class Parser(private val tokenizer: Tokenizer) {
 
     fun hasNext(): Boolean = currentToken.orNull() != null && nextToken.orNull() != null
 
-    fun parseExpression(): Node {
+    private fun parseSimpleExpression(): Node {
         if (currentToken.type == TokenType.UNDEFINED)
             return StringLiteral("")
 
@@ -37,6 +37,19 @@ class Parser(private val tokenizer: Tokenizer) {
 
             else -> throw ParseException("Could not parse expression: Unknown expression starting with token of type ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
         }
+    }
+
+    fun parseExpression(): Node {
+        val left = parseSimpleExpression()
+
+        if (currentToken.compareToken(TokenType.EQUALS)) {
+            consume() // '='
+
+            val right = parseExpression()
+            return FunctionCall("", "equal", hashMapOf("a" to left, "b" to right), false)
+        }
+
+        return left
     }
 
     /**

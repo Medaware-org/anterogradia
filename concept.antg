@@ -3,7 +3,7 @@
 sequence {
     mem:set(key = "x", value = random { 123, 321 }),
 
-    if (equal(a = mem:get(key = "x"), b = 123)) {
+    if (mem:get(key = "x") = 123) {
         "Hello, World!"
     } else {
         "!World, Hello"
