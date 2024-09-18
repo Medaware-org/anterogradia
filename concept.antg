@@ -1,7 +1,12 @@
-@library "org.medaware.anterogradia.libs.MedawareDesignToolkit"
-
-mdk:article {
-    mdk:title(str = "Drugs are really fun"),
-    mdk:lead(str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In eget ligula iaculis, tincidunt lacus id, pellentesque erat. Praesent tristique leo eget massa semper, vel venenatis dui tempus. Fusce venenatis sem at leo fringilla, vitae imperdiet est porta. Mauris fermentum feugiat mollis. Vivamus pretium consequat purus eget porttitor. Morbi auctor nunc ac imperdiet ornare. Vestibulum tincidunt lacus sed dignissim"),
-    mdk:banner(src = "https://www.hukins-hops.co.uk/wp-content/uploads/2023/12/are-hops-related-to-weed.jpg")
+progn {
+    "guest" := random {"Braun", "Merkel"},
+    sequence {
+        "Hello, ",
+        if (&"guest" = "Braun") {
+            "Mr "
+        } else {
+            "Mrs. "
+        },
+        &"guest", "!"
+    }
 }

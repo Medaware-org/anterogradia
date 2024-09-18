@@ -26,25 +26,141 @@ class Parser(private val tokenizer: Tokenizer) {
 
     fun hasNext(): Boolean = currentToken.orNull() != null && nextToken.orNull() != null
 
-    fun parseExpression(): Node {
+    private fun parseSimpleExpression(): Node {
         if (currentToken.type == TokenType.UNDEFINED)
             return StringLiteral("")
 
-        return when (currentToken.type) {
+        val getBinding = (currentToken.type == TokenType.AMPERSAND)
+
+        if (getBinding)
+            consume() // '&'
+
+        val expr = parseBindings() ?: when (currentToken.type) {
             TokenType.IDENTIFIER -> parseFunctionCall()
             TokenType.STRING_LITERAL,
             TokenType.NUMBER_LITERAL -> parseStringLiteral()
 
-            else -> throw ParseException("Could not parse expression: Unknown expression starting with token of type ${currentToken.type} on line ${currentToken.line}.")
+            else -> throw ParseException("Could not parse expression: Unknown expression starting with token of type ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
         }
+
+        return if (getBinding) FunctionCall("", "get", hashMapOf("key" to expr), false) else expr
+    }
+
+    fun parseExpression(): Node {
+        val left = parseSimpleExpression()
+
+        // Comparison binding
+        if (currentToken.compareToken(TokenType.EQUALS)) {
+            consume() // '='
+            return FunctionCall("", "equal", hashMapOf("a" to left, "b" to parseSimpleExpression()), false)
+        }
+
+        // Variable assignment
+        if (currentToken.compareToken(TokenType.ASSIGN_RIGHT)) {
+            consume() // ':='
+            return FunctionCall("", "set", hashMapOf("key" to left, "value" to parseSimpleExpression()), false)
+        }
+
+        return left
+    }
+
+    /**
+     * Parse the block as a `progn` call
+     */
+    fun parseBlock(): FunctionCall {
+        if (!currentToken.compareToken(TokenType.LCURLY))
+            throw ParseException("Expected '{', got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume() // '{'
+
+        var paramNumber = 0
+        val params = hashMapOf<String, Node>()
+        val blockLine = currentToken.line
+
+        while (!currentToken.compareToken(TokenType.RCURLY) && !currentToken.compareToken(TokenType.UNDEFINED)) {
+            val blockExpr = parseExpression()
+            params.put((paramNumber++).toString(), blockExpr)
+        }
+
+        if (currentToken.compareToken(TokenType.UNDEFINED))
+            throw ParseException("Reached end of file while parsing block on line ${blockLine}. This is likely due to an unclosed pair of parentheses or brackets.")
+
+        consume() // Skip '}'
+
+        return FunctionCall("", "progn", params, true)
+    }
+
+    fun parseBindings(): Node? {
+        if (currentToken.compareToken("if"))
+            return parseIfConstruct()
+
+        var result: Node? = null
+
+        if (currentToken.compareToken("true"))
+            result = StringLiteral("true")
+        else if (currentToken.compareToken("false"))
+            result = StringLiteral("false")
+
+        if (result != null) {
+            consume()
+            return result
+        }
+
+        return null
+    }
+
+    fun parseIfConstruct(): FunctionCall {
+        if (!currentToken.compareToken("if"))
+            throw ParseException("Expected identifier 'if' at the start of an if construct, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume() // "if"
+
+        if (!currentToken.compareToken(TokenType.LPAREN))
+            throw ParseException("Expected '(' after the 'if' identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume() // '(
+
+        val expr = parseExpression()
+
+        if (!currentToken.compareToken(TokenType.RPAREN))
+            throw ParseException("Expected ')' after the conditional expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume() // ')'
+
+        val thenFunction = parseBlock()
+
+        if (!currentToken.compareToken("else"))
+            return FunctionCall(
+                "",
+                "_if",
+                hashMapOf<String, Node>(
+                    "cond" to expr,
+                    "then" to thenFunction,
+                    "else" to FunctionCall("", "nothing", hashMapOf())
+                )
+            )
+
+        consume() // 'else'
+
+        val elseFunction = parseBlock()
+
+        return FunctionCall(
+            "",
+            "_if",
+            hashMapOf<String, Node>(
+                "cond" to expr,
+                "then" to thenFunction,
+                "else" to elseFunction
+            )
+        )
     }
 
     fun parseStringLiteral(): StringLiteral {
-        var value: String = when (currentToken.type) {
+        val value: String = when (currentToken.type) {
             TokenType.STRING_LITERAL,
             TokenType.NUMBER_LITERAL -> currentToken.value
 
-            else -> throw ParseException("Could not parse string literal from token of type ${currentToken.type} on line ${currentToken.line}.")
+            else -> throw ParseException("Could not parse string literal from token of type ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
         }
 
         consume()
@@ -59,12 +175,12 @@ class Parser(private val tokenizer: Tokenizer) {
         consume()
 
         if (!currentToken.compareToken("library"))
-            throw ParseException("Expected 'library' keyword after the '@' prefix, got ${currentToken.type} on line ${currentToken.line}.")
+            throw ParseException("Expected 'library' keyword after the '@' prefix, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
         consume()
 
         if (currentToken.type != TokenType.STRING_LITERAL)
-            throw ParseException("Expected string literal (library path) after the 'library' keyword, got ${currentToken.type} on line ${currentToken.line}.")
+            throw ParseException("Expected string literal (library path) after the 'library' keyword, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
         val path = currentToken.value
 
@@ -75,7 +191,7 @@ class Parser(private val tokenizer: Tokenizer) {
 
     fun parseFunctionCall(): FunctionCall {
         if (!currentToken.compareToken(TokenType.IDENTIFIER))
-            throw ParseException("Could not parse function call: Unexpected token of type ${currentToken.type} found on line ${currentToken.line} in place of the function identifier or library prefix.")
+            throw ParseException("Could not parse function call: Unexpected token of type ${currentToken.type} \"${currentToken.value}\" found on line ${currentToken.line} in place of the function identifier or library prefix.")
 
         val libPrefix: String
 
@@ -87,26 +203,22 @@ class Parser(private val tokenizer: Tokenizer) {
             consume() // Skip the lib prefix
 
             if (!nextToken.compareToken(TokenType.IDENTIFIER))
-                throw ParseException("Expected function identifier after lib prefix colon, got ${currentToken.type} on line ${currentToken.line} instead.")
+                throw ParseException("Expected function identifier after lib prefix colon, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line} instead.")
 
             consume() // Skip ':'
 
         } else libPrefix = ""
 
-        val functionId = currentToken
+        val functionId = currentToken.value
 
         consume()
 
         if (!currentToken.compareToken(TokenType.LPAREN) && !currentToken.compareToken(TokenType.LCURLY))
-            throw ParseException("Could not parse function call: Expected '(' or '{' after function identifier, got ${currentToken.type} on line ${currentToken.line}.")
+            throw ParseException("Could not parse function call of \"$functionId\": Expected '(' or '{' after function identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
         val variadic: Boolean = currentToken.type == TokenType.LCURLY
         val closingType = if (currentToken.type == TokenType.LPAREN) TokenType.RPAREN else TokenType.RCURLY
         val closingChar = if (closingType == TokenType.RPAREN) ')' else '}'
-
-        if (functionId.value == "nothing") {
-            println()
-        }
 
         consume()
 
@@ -131,14 +243,14 @@ class Parser(private val tokenizer: Tokenizer) {
 
             if (!variadic) {
                 if (!currentToken.compareToken(TokenType.IDENTIFIER) || !nextToken.compareToken(TokenType.EQUALS))
-                    throw ParseException("Could not parse function call: Expected parameter identifier, got ${currentToken.type} on line ${currentToken.line}.")
+                    throw ParseException("Could not parse function call: Expected parameter identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
                 paramId = currentToken.value
 
                 consume()
 
                 if (!currentToken.compareToken(TokenType.EQUALS))
-                    throw ParseException("Could not parse function call: Expected '=' after parameter identifier '$paramId', got ${currentToken.type} on line ${currentToken.line}.")
+                    throw ParseException("Could not parse function call: Expected '=' after parameter identifier '$paramId', got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
                 consume()
             } else {
@@ -148,7 +260,7 @@ class Parser(private val tokenizer: Tokenizer) {
             val expr = parseExpression()
 
             if (params[paramId] != null)
-                throw ParseException("Could not parse function call: Each parameter must only be assigned once. Violation on parameter '$paramId' when calling function '${functionId.value}' on line ${currentToken.line}.")
+                throw ParseException("Could not parse function call: Each parameter must only be assigned once. Violation on parameter '$paramId' when calling function '${functionId}' on line ${currentToken.line}.")
 
             params[paramId] = expr
 
@@ -158,7 +270,7 @@ class Parser(private val tokenizer: Tokenizer) {
             }
 
             if (!currentToken.compareToken(closingType))
-                throw ParseException("Could not parse function call: Expected '$closingChar' or ',' and more parameters, got ${currentToken.type} on line ${currentToken.line}.")
+                throw ParseException("Could not parse function call: Expected '$closingChar' or ',' and more parameters, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
             consume() // Skip ')' or '}'
             break

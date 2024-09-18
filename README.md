@@ -5,17 +5,16 @@ A markup system for the Medaware platform
 ## Example Program
 
 ```js
-@library "org.medaware.anterogradia.libs.Memory"
-
 progn {
-   mem:set(key = "guest", value = random {"Braun", "Merkel"}),
+   "guest" := random {"Braun", "Merkel"},
    sequence {
       "Hello, ",
-      if (    cond = equal(  a = mem:get(key = "guest"), 
-              b = "Braun"),
-              then = "Mr. ",
-              else = "Mrs. "),
-      mem:get(key = "guest")
+      if (&"guest" = "Braun") {
+         "Mr "
+      } else {
+         "Mrs. "
+      },
+      &"guest", "!"
    }
 }
 ```
@@ -127,15 +126,19 @@ Below is a brief documentation of all the standard lib functions
 
 ---
 
-### if
+### _if
 
-| if                                                                | cond                                                  | then       | else       |
-|-------------------------------------------------------------------|-------------------------------------------------------|------------|------------|
-| Evaluates 'then' if 'cond' is "true", otherwise evaluates 'else'. | "true" or "yes" for true. Otherwise considered false. | Expression | Expression |
+> :warning: *Superseded by the if construct*
+
+| _if                                                             | cond                                                  | then       | else       |
+|-----------------------------------------------------------------|-------------------------------------------------------|------------|------------|
+| Evaluates 'then' if 'cond' is true, otherwise evaluates 'else'. | "true" or "yes" for true. Otherwise considered false. | Expression | Expression |
 
 ---
 
 ### equal
+
+> :warning: *Syntax binding available*
 
 | equal                                                 | a          | b          |
 |-------------------------------------------------------|------------|------------|
@@ -148,3 +151,73 @@ Below is a brief documentation of all the standard lib functions
 | param                                | key           |
 |--------------------------------------|---------------|
 | Retrieve a runtime startup parameter | Parameter key |
+
+---
+
+### set
+
+> :warning: *Syntax binding available*
+
+| set                            | key           | value            |
+|--------------------------------|---------------|------------------|
+| Sets or creates a new variable | variable name | value expression |
+
+---
+
+### get
+
+> :warning: *Syntax binding available*
+
+| get                                         | key           |
+|---------------------------------------------|---------------|
+| Retrieves the value of an existing variable | variable name |
+
+
+## Syntax bindings
+
+To improve developer experience, some functions or expressions can be written in the form of dedicated syntactical entities.
+Despite not looking like it, syntactical bindings still utilize the function infrastructure of ANTG and thus evaluate to function
+calls. Think of them as glorified preprocessors. Below is a list of all such bindings available as of writing this entry.
+
+### Conditional Statement
+Old function form
+```
+if (condition, then-block, else-block)
+```
+
+can ba rewritten as a construct
+```
+if ( condition ) { then-block } else { else-block }
+```
+
+The original `if` function has been renamed to `_if`.
+
+### Comparison
+Function form
+```
+equal ( left, right )
+```
+has an alternate form of
+```
+left = right
+```
+
+### Setting a variable
+Function form
+```
+set (key, value)
+```
+Syntax binding
+```
+key := value
+```
+
+### Retrieving a variable
+Function form
+```
+get (key)
+```
+Syntax binding
+```
+& key
+```

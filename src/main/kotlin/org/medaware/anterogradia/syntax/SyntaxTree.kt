@@ -1,7 +1,6 @@
 package org.medaware.anterogradia.syntax
 
 import org.medaware.anterogradia.runtime.Runtime
-import org.medaware.anterogradia.syntax.tokenizer.Token
 
 data class Script(val libs: List<String>, val expression: Node)
 
@@ -11,7 +10,7 @@ sealed class Node {
 
 data class FunctionCall(
     val prefix: String,
-    val identifier: Token,
+    val identifier: String,
     val arguments: HashMap<String, Node>,
     val variadic: Boolean = false
 ) : Node() {
