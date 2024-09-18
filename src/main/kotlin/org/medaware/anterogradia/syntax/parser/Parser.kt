@@ -39,6 +39,32 @@ class Parser(private val tokenizer: Tokenizer) {
         }
     }
 
+    /**
+     * Parse the block as a `progn` call
+     */
+    fun parseBlock(): FunctionCall {
+        if (!currentToken.compareToken(TokenType.LCURLY))
+            throw ParseException("Expected '{', got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume() // '{'
+
+        var paramNumber = 0
+        val params = hashMapOf<String, Node>()
+        val blockLine = currentToken.line
+
+        while (!currentToken.compareToken(TokenType.RCURLY) && !currentToken.compareToken(TokenType.UNDEFINED)) {
+            val blockExpr = parseExpression()
+            params.put((paramNumber++).toString(), blockExpr)
+        }
+
+        if (currentToken.compareToken(TokenType.UNDEFINED))
+            throw ParseException("Reached end of file while parsing block on line ${blockLine}. This is likely due to an unclosed pair of parentheses or brackets.")
+
+        consume() // Skip '}'
+
+        return FunctionCall("", "progn", params, true)
+    }
+
     fun parseBindings(): Node? {
         if (currentToken.compareToken("if"))
             return parseIfConstruct()
@@ -62,42 +88,21 @@ class Parser(private val tokenizer: Tokenizer) {
         if (!currentToken.compareToken("if"))
             throw ParseException("Expected identifier 'if' at the start of an if construct, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
-        consume() // Skip "if"
+        consume() // "if"
 
         if (!currentToken.compareToken(TokenType.LPAREN))
             throw ParseException("Expected '(' after the 'if' identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
-        consume()
+        consume() // '(
 
         val expr = parseExpression()
 
         if (!currentToken.compareToken(TokenType.RPAREN))
             throw ParseException("Expected ')' after the conditional expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
-        consume()
+        consume() // ')'
 
-        if (!currentToken.compareToken(TokenType.LCURLY))
-            throw ParseException("Expected '{', got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
-
-        consume()
-
-        var paramNumber = 0
-
-        val params = hashMapOf<String, Node>()
-
-        var blockLine = currentToken.line
-
-        while (!currentToken.compareToken(TokenType.RCURLY) && !currentToken.compareToken(TokenType.UNDEFINED)) {
-            val blockExpr = parseExpression()
-            params.put((paramNumber++).toString(), blockExpr)
-        }
-
-        if (currentToken.compareToken(TokenType.UNDEFINED))
-            throw ParseException("Reached end of file while parsing if block on line ${blockLine}. This is likely due to an unclosed pair of parentheses or brackets.")
-
-        consume() // Skip '}'
-
-        val thenFunction = FunctionCall("", "progn", params, true)
+        val thenFunction = parseBlock()
 
         if (!currentToken.compareToken("else"))
             return FunctionCall(
@@ -110,31 +115,9 @@ class Parser(private val tokenizer: Tokenizer) {
                 )
             )
 
-        consume() // Skip 'else'
+        consume() // 'else'
 
-        if (!currentToken.compareToken(TokenType.LCURLY))
-            throw ParseException("Expected '{' after 'else', got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
-
-        consume()
-
-        blockLine = currentToken.line
-
-        val elseParams = hashMapOf<String, Node>()
-
-        paramNumber = 0
-
-        while (!currentToken.compareToken(TokenType.RCURLY) && !currentToken.compareToken(TokenType.UNDEFINED)) {
-            val blockExpr = parseExpression()
-            elseParams.put((paramNumber++).toString(), blockExpr)
-        }
-
-        if (currentToken.compareToken(TokenType.UNDEFINED))
-            throw ParseException("Reached end of file while parsing if block on line ${blockLine}. This is likely due to an unclosed pair of parentheses or brackets.")
-
-
-        consume()
-
-        val elseFunction = FunctionCall("", "progn", elseParams, true)
+        val elseFunction = parseBlock()
 
         return FunctionCall(
             "",
