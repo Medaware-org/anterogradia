@@ -1,15 +1,6 @@
 @library "org.medaware.anterogradia.libs.Memory"
 
 sequence {
-    mem:set(key = "x", value = random { 123, 321 }),
-
-    if (mem:get(key = "x") = 123) {
-        "Hello, World!"
-    } else {
-        "!World, Hello"
-    },
-
-    if (true) {
-        "Hi!"
+    if ("x" = "y" = "z") {
     }
 }

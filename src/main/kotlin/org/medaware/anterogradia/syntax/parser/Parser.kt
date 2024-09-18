@@ -45,8 +45,7 @@ class Parser(private val tokenizer: Tokenizer) {
         if (currentToken.compareToken(TokenType.EQUALS)) {
             consume() // '='
 
-            val right = parseExpression()
-            return FunctionCall("", "equal", hashMapOf("a" to left, "b" to right), false)
+            return FunctionCall("", "equal", hashMapOf("a" to left, "b" to parseSimpleExpression()), false)
         }
 
         return left
