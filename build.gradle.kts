@@ -20,7 +20,6 @@ publishing {
         create<MavenPublication>("anterogradia-maven") {
             from(components["kotlin"])
             artifactId = "anterogradia"
-            version
         }
     }
     repositories {
