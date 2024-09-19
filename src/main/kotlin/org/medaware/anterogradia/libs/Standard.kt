@@ -75,4 +75,7 @@ class Standard(val runtime: Runtime) {
     @DiscreteFunction(identifier = "get", params = ["key"])
     fun set(key: Node): String = variableStore[key.evaluate(runtime)] ?: ""
 
+    @DiscreteFunction(identifier = "astd", params = ["expr"])
+    fun astd(n: Node): String = n.dump()
+
 }
