@@ -44,14 +44,21 @@ class Tokenizer(private var inputString: String) {
     fun skipSpaces() {
         var spaceCount: Int = 0
 
+        var isComment = false
+
         for (char in input) {
-            if (!isSpace(char))
+            if (char == '#')
+                isComment = true
+
+            if (!isSpace(char) && !isComment)
                 break
 
             val trimmedChar: Char = char
 
-            if (trimmedChar == '\n')
+            if (trimmedChar == '\n') {
                 lineNumber++
+                isComment = false
+            }
 
             spaceCount++
         }

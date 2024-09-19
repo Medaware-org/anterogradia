@@ -1,9 +1,10 @@
 progn {
     "guest" := random {"Braun", "Merkel"},
-    sequence {
-        "Hello, ",
+    # This is a line comment
+    sequence { # and
+        "Hello, ", # so
         if (&"guest" = "Braun") {
-            "Mr "
+            "Mr " # is this
         } else {
             "Mrs. "
         },
