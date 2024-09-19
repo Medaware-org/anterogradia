@@ -1,6 +1,6 @@
 ## Medaware&trade; Anterogradia
 
-A markup system for the Medaware platform
+A custom markup system for the Medaware platform
 
 ## Example Program
 
