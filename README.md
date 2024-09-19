@@ -72,7 +72,7 @@ startup parameters that will be accessible to the script at runtime.
 
 ## Importing Libraries
 Additional libs can be imported from within the script using the following syntax:
-```
+```js
 @library "path.to.library.Clazz" as identifier 
 ```
 Where `identifier` is the prefix to be used when referring to the library's functions.
