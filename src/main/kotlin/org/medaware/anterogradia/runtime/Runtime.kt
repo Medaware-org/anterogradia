@@ -15,22 +15,20 @@ class Runtime(val parameters: HashMap<String, String> = hashMapOf()) {
     private val libInstances = hashMapOf<Class<*>, Any>()
 
     init {
-        libManager.register(Standard::class.java)
+        libManager.register(Standard::class.java, "")
     }
 
-    fun loadLibrary(path: String) {
+    fun loadLibrary(path: String, prefix: String) {
         val libClass: Class<*> = try {
             Class.forName(path)
         } catch (e: Exception) {
             throw LibraryException("Could not load library '${path}'.")
         }
 
-        if (libManager.isLibLoaded(libClass)) {
-            Anterogradia.logger.info("Library class '${libClass.canonicalName}' is already loaded. Skipping.")
-            return
-        }
+        if (libManager.isLibLoaded(libClass))
+            throw LibraryException("Library class '${libClass.canonicalName}' is already loaded.")
 
-        libManager.register(libClass)
+        libManager.register(libClass, prefix)
     }
 
     fun callFunction(call: FunctionCall): String =

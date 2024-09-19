@@ -2,7 +2,7 @@ package org.medaware.anterogradia.syntax
 
 import org.medaware.anterogradia.runtime.Runtime
 
-data class Script(val libs: List<String>, val expression: Node)
+data class Script(val libs: List<Pair<String, String>>, val expression: Node)
 
 sealed class Node {
     abstract fun evaluate(runtime: Runtime): String
