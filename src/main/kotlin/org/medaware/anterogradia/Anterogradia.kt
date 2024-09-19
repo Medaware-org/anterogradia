@@ -40,7 +40,9 @@ object Anterogradia {
 
         try {
             val script = Parser.parseScript(input)
-            script.libs.forEach(runtime::loadLibrary)
+            script.libs.forEach { lib ->
+                runtime.loadLibrary(lib.first, lib.second)
+            }
             result = script.expression.evaluate(runtime)
         } catch (e: Exception) {
             except = e

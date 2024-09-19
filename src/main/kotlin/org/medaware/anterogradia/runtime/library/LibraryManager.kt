@@ -9,16 +9,12 @@ import org.medaware.anterogradia.syntax.Node
 
 class LibraryManager {
 
-    private val libraries: MutableSet<Class<*>> = mutableSetOf()
+    private val libraries = hashMapOf<String, Class<*>>()
 
     private val logger = Anterogradia.logger
 
     private fun libByPrefix(prefix: String): Class<*>? {
-        return try {
-            libraries.first { it.getAnnotation(AnterogradiaLibrary::class.java).prefix == prefix }
-        } catch (e: NoSuchElementException) {
-            null
-        }
+        return libraries[prefix]
     }
 
     private fun libSanityCheck(lib: Class<*>) {
@@ -99,21 +95,23 @@ class LibraryManager {
         }
     }
 
-    fun register(libClass: Class<*>) {
-        val lib = libClass.getAnnotation(AnterogradiaLibrary::class.java)
+    fun register(libClass: Class<*>, prefix: String) {
+        libClass.getAnnotation(AnterogradiaLibrary::class.java)
             ?: throw LibraryException("Failed to register library class '${libClass.canonicalName}'. Class is not annotated with '@AnterogradiaLibrary'.")
 
-        val conflict = libByPrefix(lib.prefix)
+        val conflict = libByPrefix(prefix)
 
         if (conflict != null)
-            throw LibraryException("Failed to register library class '${libClass.simpleName}' due to a namespace conflict with '${conflict.simpleName}'.")
+            throw LibraryException("Failed to register library class '${libClass.simpleName}' due to a namespace conflict with '${conflict.simpleName}': Both libraries were imported as '$prefix'")
 
         libSanityCheck(libClass)
 
-        if (!libraries.add(libClass))
-            throw LibraryException("Attempted to register the same library class twice: '${libClass.simpleName}'.")
+        if (libByPrefix(prefix) != null)
+            throw LibraryException("Attempted to register two libraries under the same prefix: '$prefix'.")
 
-        logger.info("Successfully registered library '${libClass.simpleName}' with prefix '${lib.prefix}'.")
+        libraries[prefix] = libClass
+
+        logger.info("Successfully imported library '${libClass.simpleName}' as " + (if (prefix.isEmpty()) "the standard library" else "'$prefix'"))
     }
 
     fun invokeLibMethod(
@@ -124,7 +122,7 @@ class LibraryManager {
         variadic: Boolean
     ): String {
         val lib =
-            libByPrefix(prefix) ?: throw FunctionCallException("Could not find any library with prefix '$prefix'.")
+            libByPrefix(prefix) ?: throw FunctionCallException("No library was imported with prefix '$prefix'.")
 
         val rawMethods =
             lib.declaredMethods.filter { it.getAnnotation(DiscreteFunction::class.java)?.identifier == name }
@@ -200,7 +198,7 @@ class LibraryManager {
     }
 
     fun isLibLoaded(libClass: Class<*>): Boolean {
-        return this.libraries.contains(libClass)
+        return this.libraries.values.contains(libClass)
     }
 
 }

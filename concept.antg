@@ -1,13 +1,22 @@
+@library "org.medaware.anterogradia.libs.HTML" as html
+
 progn {
     "guest" := random {"Braun", "Merkel"},
-    # This is a line comment
-    sequence { # and
-        "Hello, ", # so
-        if (&"guest" = "Braun") {
-            "Mr " # is this
-        } else {
-            "Mrs. "
-        },
-        &"guest", "!"
+    html:html {
+        html:head {},
+        html:body {
+            html:h1 (
+                attributes = nothing(),
+                body = sequence {
+                    "Hello, ",
+                    if (&"guest" = "Braun") {
+                        "Mr "
+                    } else {
+                        "Mrs. "
+                    },
+                    &"guest", "!"
+                }
+            )
+        }
     }
 }

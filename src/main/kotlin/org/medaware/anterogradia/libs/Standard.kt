@@ -3,11 +3,11 @@ package org.medaware.anterogradia.libs
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.DiscreteFunction
-import org.medaware.anterogradia.runtime.library.StateRetention
+import org.medaware.anterogradia.runtime.library.StateRetention.STATEFUL
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
 
-@AnterogradiaLibrary(stateRetention = StateRetention.STATEFUL)
+@AnterogradiaLibrary(STATEFUL)
 class Standard(val runtime: Runtime) {
 
     private val variableStore = hashMapOf<String, String>()
