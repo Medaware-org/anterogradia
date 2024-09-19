@@ -70,6 +70,23 @@ startup parameters that will be accessible to the script at runtime.
    difference between `sequence` and `if`
    in the example above).
 
+## Importing Libraries
+Additional libs can be imported from within the script using the following syntax:
+```
+@library "path.to.library.Clazz" as identifier 
+```
+Where `identifier` is the prefix to be used when referring to the library's functions.
+Note that the import directives must be placed at the very top of the file and must occur
+consecutively after each-other, i.e.
+```js
+@library "org.medaware.anterogradia.libs.HTML" as h
+@library "org.medaware.anterogradia.libs.MedawareDesignToolkit" as mdk
+@library "org.medaware.anterogradia.libs.FormattingLib" as fmt
+
+sequence {
+    ...
+```
+
 ## Standard Library
 
 Below is a brief documentation of all the standard lib functions
