@@ -28,7 +28,9 @@ data class FunctionCall(
                 builder.append("${arg.value.dump()},")
         }
 
-        builder.deleteCharAt(builder.length - 1) // Remove trailing ','
+        if (arguments.isNotEmpty())
+            builder.deleteCharAt(builder.length - 1) // Remove trailing ','
+        
         builder.append(brackets.second)
 
         return builder.toString()
