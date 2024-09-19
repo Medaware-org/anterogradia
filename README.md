@@ -172,6 +172,13 @@ Below is a brief documentation of all the standard lib functions
 |---------------------------------------------|---------------|
 | Retrieves the value of an existing variable | variable name |
 
+---
+
+### astd
+
+| astd                                                  | expr       |
+|-------------------------------------------------------|------------|
+| Generate valid ANTG source string from the expression | Expression |
 
 ## Syntax bindings
 
