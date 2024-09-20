@@ -9,7 +9,7 @@ progn {
     `guest := random { `Braun, `Merkel }
     sequence {
         "Hello, "
-        if (&`guest = "Braun") {
+        if (&`guest = `Brown) {
             "Mr "
         } else {
             "Mrs. "
