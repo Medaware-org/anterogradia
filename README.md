@@ -225,6 +225,28 @@ to the length of the string.
 |-------------------------------------------------------|------------|
 | Generate valid ANTG source string from the expression | Expression |
 
+---
+
+### _fun
+
+> :warning: *Syntax binding available*
+
+| _fun                                                                            | id              | expr       |
+|---------------------------------------------------------------------------------|-----------------|------------|
+| Stores the 'expr' as 'id' as an expression node to be evaluated at a later time | The function id | Expression |
+
+---
+
+### _eval
+
+> :warning: *Syntax binding available*
+
+| _eval                                           | id            |
+|-------------------------------------------------|---------------|
+| Evaluates a function stored under the name 'id' | Function name |
+
+---
+
 ## Syntax bindings
 
 To improve developer experience, some functions or expressions can be written in the form of dedicated syntactical
@@ -309,6 +331,34 @@ Syntax binding
 
 ```
 | expr |
+```
+
+### Function definitions
+
+Function form
+
+```
+_fun ( id, expr )
+```
+
+Syntax binding
+
+```
+fun id { expr }
+```
+
+### Function evaluation
+
+Function form
+
+```
+_eval ( id )
+```
+
+Syntax binding
+
+```
+eval id
 ```
 
 ## Additional Syntax
