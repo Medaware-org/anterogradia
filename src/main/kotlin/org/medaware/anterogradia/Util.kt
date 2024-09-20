@@ -10,3 +10,13 @@ fun String.padIfNotEmpty(): String {
 }
 
 fun Array<Node>.evalToString(runtime: Runtime) = map { it.evaluate(runtime) }.joinToString(separator = "")
+
+fun <A, B> Pair<A, B>.hasNullEntry() = this.first == null || this.second == null
+
+fun <A, B> Pair<A, B>.hasNonNullEntry() = this.first != null || this.second != null
+
+fun <T> Boolean.map(`if`: T, `else`: T) = if (this) `if` else `else`
+
+fun Pair<Double, Double>.min() = if (this.first < this.second) this.first else this.second
+
+fun Pair<Double, Double>.max() = if (this.first > this.second) this.first else this.second

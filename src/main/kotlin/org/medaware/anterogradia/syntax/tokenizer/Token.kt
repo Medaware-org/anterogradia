@@ -20,6 +20,8 @@ class Token(val type: TokenType, val value: String, val line: Int) {
         return this.type == type
     }
 
+    fun asType(type: TokenType) = Token(type, this.value, this.line)
+
     companion object {
         fun undefinedToken(line: Int): Token {
             return Token(TokenType.UNDEFINED, "", line)

@@ -1,5 +1,6 @@
 package org.medaware.anterogradia.syntax.tokenizer
 
+import org.medaware.anterogradia.exception.LexerException
 import org.medaware.anterogradia.exception.ParseException
 
 class Tokenizer(private var inputString: String) {
@@ -10,6 +11,9 @@ class Tokenizer(private var inputString: String) {
     private var lastToken: Token
 
     private var input: StringBuilder = StringBuilder(inputString)
+
+    // Indicates whether to automatically convert the next token to a string literal
+    private var stringLiteralConversion = false
 
     init {
         lastToken = Token.undefinedToken(lineNumber)
@@ -25,6 +29,11 @@ class Tokenizer(private var inputString: String) {
 
         lastToken =
             runTokenParsers()
+
+        if (stringLiteralConversion) {
+            lastToken = lastToken.asType(TokenType.STRING_LITERAL)
+            stringLiteralConversion = false
+        }
 
         return lastToken
     }
@@ -50,8 +59,19 @@ class Tokenizer(private var inputString: String) {
             if (char == '#')
                 isComment = true
 
+            if (char == '`' && !isComment) {
+                stringLiteralConversion = true
+                spaceCount++
+                continue
+            }
+
             if (!isSpace(char) && !isComment)
                 break
+
+            if (stringLiteralConversion) {
+                stringLiteralConversion = false
+                throw LexerException("A token must immediately follow after a string conversion operator. Error on line $lineNumber.")
+            }
 
             val trimmedChar: Char = char
 
