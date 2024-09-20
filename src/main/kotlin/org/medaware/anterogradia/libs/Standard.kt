@@ -69,7 +69,7 @@ class Standard(val runtime: Runtime) {
     }
 
     @DiscreteFunction(identifier = "get", params = ["key"])
-    fun set(key: Node): String = variableStore[key.evaluate(runtime)] ?: ""
+    fun get(key: Node): String = variableStore[key.evaluate(runtime)] ?: ""
 
     //
     // Boolean operations
