@@ -1,6 +1,6 @@
 progn {
-    `guest := random { `Braun, `Merkel }
-    sequence {
+    fun (id = `pickRandomGuest, expr = `guest := random { `Braun, `Merkel })
+    fun (id = `assembleGreeting, expr = sequence {
         "Hello, "
         if (&`guest = `Braun) {
             "Mr "
@@ -8,5 +8,9 @@ progn {
             "Mrs. "
         }
         &`guest `!
-    }
+    })
+    repeat (count = 20, str = progn {
+        eval(id = `pickRandomGuest)
+        eval(id = `assembleGreeting)
+    }, separator = "   ")
 }
