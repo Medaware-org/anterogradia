@@ -310,3 +310,6 @@ Syntax binding
 ```
 | expr |
 ```
+
+## Additional Syntax
+Every token that follows a backtick `` ` `` is internally converted to a string literal.

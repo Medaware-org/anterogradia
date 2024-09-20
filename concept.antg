@@ -1,3 +1,4 @@
 sequence {
-    `
+    `hello := 123
+    &`hello
 }
