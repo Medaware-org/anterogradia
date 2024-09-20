@@ -7,7 +7,7 @@ import org.medaware.anterogradia.runtime.library.DiscreteFunction
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
 
-@AnterogradiaLibrary(prefix = "mdk")
+@AnterogradiaLibrary
 class MedawareDesignToolkit(val runtime: Runtime) {
 
     @DiscreteFunction(identifier = "about")

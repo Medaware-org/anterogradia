@@ -204,7 +204,7 @@ class Parser(private val tokenizer: Tokenizer) {
         return StringLiteral(value)
     }
 
-    fun parseLoadInstruction(): String? {
+    fun parseLoadInstruction(): Pair<String, String>? {
         if (!currentToken.compareToken(TokenType.AT))
             return null // We don't just throw an exception here because we want this operation to be non-invasive
 
@@ -222,7 +222,19 @@ class Parser(private val tokenizer: Tokenizer) {
 
         consume()
 
-        return path
+        if (!currentToken.compareToken("as"))
+            throw ParseException("Expected 'as' after library path, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}")
+
+        consume()
+
+        if (!currentToken.compareToken(TokenType.IDENTIFIER))
+            throw ParseException("Expected prefix identifier after 'as' keyword, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}")
+
+        val prefix = currentToken.value
+
+        consume()
+
+        return path to prefix
     }
 
     fun parseFunctionCall(): FunctionCall {
@@ -321,7 +333,7 @@ class Parser(private val tokenizer: Tokenizer) {
     companion object {
         fun parseScript(str: String): Script {
             val parser = Parser(Tokenizer(str))
-            val libs = mutableListOf<String>()
+            val libs = mutableListOf<Pair<String, String>>()
             while (true) {
                 val lib = parser.parseLoadInstruction() ?: break
                 libs.add(lib)

@@ -6,11 +6,11 @@ import org.medaware.anterogradia.map
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.DiscreteFunction
-import org.medaware.anterogradia.runtime.library.StateRetention
+import org.medaware.anterogradia.runtime.library.StateRetention.STATEFUL
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
 
-@AnterogradiaLibrary(stateRetention = StateRetention.STATEFUL)
+@AnterogradiaLibrary(STATEFUL)
 class Standard(val runtime: Runtime) {
 
     companion object {
@@ -135,4 +135,8 @@ class Standard(val runtime: Runtime) {
 
     @DiscreteFunction(identifier = "len", params = ["expr"])
     fun length(expr: Node): String = expr.evaluate(runtime).length.toString()
+
+    @DiscreteFunction(identifier = "astd", params = ["expr"])
+    fun astd(n: Node): String = n.dump()
+
 }

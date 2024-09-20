@@ -13,4 +13,4 @@ enum class StateRetention {
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class AnterogradiaLibrary(val prefix: String = "", val stateRetention: StateRetention = StateRetention.STATELESS)
+annotation class AnterogradiaLibrary(val stateRetention: StateRetention = StateRetention.STATELESS)

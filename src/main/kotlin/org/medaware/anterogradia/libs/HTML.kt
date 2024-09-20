@@ -8,11 +8,11 @@ import org.medaware.anterogradia.runtime.library.DiscreteFunction
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
 
-@AnterogradiaLibrary(prefix = "HTML")
+@AnterogradiaLibrary
 class HTML(val runtime: Runtime) {
 
     @DiscreteFunction(identifier = "about")
-    fun about(): String = "Medaware Antg. HTML Plugin\n{C} Medaware, 2024\n"
+    fun about(): String = "Medaware ANTG HTML Plugin\n{C} Medaware, 2024\n"
 
     private fun tag(id: String, attrs: String = "", content: String = "") =
         """
