@@ -1,4 +1,12 @@
-sequence {
-    `hello := 123
-    &`hello
+progn {
+    `guest := random { `Braun, `Merkel }
+    sequence {
+        "Hello, "
+        if (&`guest = "Braun") {
+            "Mr "
+        } else {
+            "Mrs. "
+        }
+        &`guest `!
+    }
 }

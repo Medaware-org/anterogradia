@@ -6,7 +6,7 @@ A custom markup system for the Medaware platform
 
 ```kotlin
 progn {
-    `guest := random { "Braun", "Merkel" }
+    `guest := random { `Braun, `Merkel }
     sequence {
         "Hello, "
         if (&`guest = "Braun") {
@@ -14,7 +14,7 @@ progn {
         } else {
             "Mrs. "
         }
-        &`guest "!"
+        &`guest `!
     }
 }
 ```
