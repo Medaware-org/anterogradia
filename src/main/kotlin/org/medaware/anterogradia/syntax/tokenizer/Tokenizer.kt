@@ -11,6 +11,9 @@ class Tokenizer(private var inputString: String) {
 
     private var input: StringBuilder = StringBuilder(inputString)
 
+    // Indicates whether to automatically convert the next token to a string literal
+    private var stringLiteralConversion = false
+
     init {
         lastToken = Token.undefinedToken(lineNumber)
 
@@ -25,6 +28,11 @@ class Tokenizer(private var inputString: String) {
 
         lastToken =
             runTokenParsers()
+
+        if (stringLiteralConversion) {
+            lastToken = lastToken.asType(TokenType.STRING_LITERAL)
+            stringLiteralConversion = false
+        }
 
         return lastToken
     }
