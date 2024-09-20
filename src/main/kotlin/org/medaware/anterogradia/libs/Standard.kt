@@ -87,7 +87,7 @@ class Standard(val runtime: Runtime) {
     }
 
     @DiscreteFunction(identifier = "equal", params = [CMP_LEFT, CMP_RIGHT])
-    fun equal(a: Node, b: Node): String = if (a.evaluate(runtime) == b.evaluate(runtime)) "true" else "false"
+    fun equal(left: Node, right: Node): String = if (left.evaluate(runtime) == right.evaluate(runtime)) TRUE else FALSE
 
     @DiscreteFunction(identifier = "lgt", params = [CMP_LEFT, CMP_RIGHT])
     fun leftGreater(a: Node, b: Node): String {
