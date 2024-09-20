@@ -1,12 +1,3 @@
-progn {
-    "guest" := random { "Braun", "Merkel" }
-    sequence {
-        "Hello, "
-        if (&"guest" = "Braun") {
-            "Mr "
-        } else {
-            "Mrs. "
-        }
-        &"guest" "!"
-    }
+sequence {
+    `
 }

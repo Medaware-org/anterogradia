@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
 import java.util.logging.ConsoleHandler
+import java.util.logging.Level
 import java.util.logging.LogRecord
 import java.util.logging.Logger
 import java.util.logging.SimpleFormatter
@@ -60,7 +61,7 @@ fun main() {
     Anterogradia.invokeCompiler(input, parameters = hashMapOf("time" to Instant.now().toString()))
         .use { input, output, except ->
             if (except != null) {
-                except.printStackTrace()
+                Anterogradia.logger.log(Level.SEVERE, "${except.javaClass.simpleName}: ${except.message}")
             } else {
                 println(output)
             }
