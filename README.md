@@ -6,16 +6,16 @@ A custom markup system for the Medaware platform
 
 ```js
 progn {
-   "guest" := random {"Braun", "Merkel"},
-   sequence {
-      "Hello, ",
-      if (&"guest" = "Braun") {
-         "Mr "
-      } else {
-         "Mrs. "
-      },
-      &"guest", "!"
-   }
+    "guest" := random { "Braun", "Merkel" }
+    sequence {
+        "Hello, "
+        if (&"guest" = "Braun") {
+            "Mr "
+        } else {
+            "Mrs. "
+        }
+        &"guest" "!"
+    }
 }
 ```
 
@@ -84,9 +84,9 @@ Below is a brief documentation of all the standard lib functions
 
 ### sequence
 
-| sequence                                                             | (variadic arguments) |
-|----------------------------------------------------------------------|----------------------|
-| Evaluate varargs and join the resulting strings of each one of them. | Expressions          |
+| sequence                                                                          | (variadic arguments) |
+|-----------------------------------------------------------------------------------|----------------------|
+| Evaluate varargs sequentially and join the resulting strings of each one of them. | Expressions          |
 
 ---
 
@@ -128,7 +128,7 @@ Below is a brief documentation of all the standard lib functions
 
 ### _if
 
-> :warning: *Superseded by the if construct*
+> :warning: *Syntax binding available*
 
 | _if                                                             | cond                                                  | then       | else       |
 |-----------------------------------------------------------------|-------------------------------------------------------|------------|------------|
@@ -140,9 +140,9 @@ Below is a brief documentation of all the standard lib functions
 
 > :warning: *Syntax binding available*
 
-| equal                                                 | a          | b          |
-|-------------------------------------------------------|------------|------------|
-| Evaluates to "true" if 'a' == 'b'. Otherwise "false". | Expression | Expression |
+| equal                                                        | left       | right      |
+|--------------------------------------------------------------|------------|------------|
+| Evaluates to "true" if 'left' == 'right'. Otherwise "false". | Expression | Expression |
 
 ---
 
@@ -172,52 +172,99 @@ Below is a brief documentation of all the standard lib functions
 |---------------------------------------------|---------------|
 | Retrieves the value of an existing variable | variable name |
 
+---
+
+### Comparison functions `lgt` and `rgt`
+
+> :warning: *Syntax binding available*
+
+| lgt / rgt     | left       | right      |
+|---------------|------------|------------|
+| _(See below)_ | Expression | Expression |
+
+`lgt` returns "true" when _left_ is greater than _right_ <br>
+`rgt` returns "true" when _right_ is greater than _left_
+
+When both `left` and `right` are numbers, the functions compare their numeric values. <br>
+When both are strings, their lexical order is compared. <br>
+Otherwise, when one expression is a string literal and the other a number, the number is compared
+to the length of the string.
+
+### len
+
+| len                          | expr       |
+|------------------------------|------------|
+| Returns the length of result | Expression |
+
+---
 
 ## Syntax bindings
 
-To improve developer experience, some functions or expressions can be written in the form of dedicated syntactical entities.
-Despite not looking like it, syntactical bindings still utilize the function infrastructure of ANTG and thus evaluate to function
-calls. Think of them as glorified preprocessors. Below is a list of all such bindings available as of writing this entry.
+To improve developer experience, some functions or expressions can be written in the form of dedicated syntactical
+entities.
+Despite not looking like it, syntactical bindings still utilize the function infrastructure of ANTG and thus evaluate to
+function
+calls. Think of them as glorified preprocessors. Below is a list of all such bindings available as of writing this
+entry.
 
 ### Conditional Statement
+
 Old function form
+
 ```
 if (condition, then-block, else-block)
 ```
 
 can ba rewritten as a construct
+
 ```
 if ( condition ) { then-block } else { else-block }
 ```
 
 The original `if` function has been renamed to `_if`.
 
-### Comparison
-Function form
+### Comparison Bindings
+
+Function forms
+
 ```
 equal ( left, right )
+lgt   ( left, right)
+rgt   ( left, right)
 ```
+
 has an alternate form of
+
 ```
 left = right
+left > right
+left < right
 ```
 
 ### Setting a variable
+
 Function form
+
 ```
 set (key, value)
 ```
+
 Syntax binding
+
 ```
 key := value
 ```
 
 ### Retrieving a variable
+
 Function form
+
 ```
 get (key)
 ```
+
 Syntax binding
+
 ```
 & key
 ```

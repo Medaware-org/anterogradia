@@ -1,6 +1,7 @@
 package org.medaware.anterogradia.syntax.parser
 
 import org.medaware.anterogradia.exception.ParseException
+import org.medaware.anterogradia.libs.Standard
 import org.medaware.anterogradia.syntax.FunctionCall
 import org.medaware.anterogradia.syntax.Node
 import org.medaware.anterogradia.syntax.Script
@@ -47,18 +48,53 @@ class Parser(private val tokenizer: Tokenizer) {
     }
 
     fun parseExpression(): Node {
-        val left = parseSimpleExpression()
+        val magnitude = currentToken.compareToken(TokenType.VBAR)
 
-        // Comparison binding
+        if (magnitude)
+            consume() // '|'
+
+        var left = parseSimpleExpression()
+
+        // Comparison bindings
         if (currentToken.compareToken(TokenType.EQUALS)) {
             consume() // '='
-            return FunctionCall("", "equal", hashMapOf("a" to left, "b" to parseSimpleExpression()), false)
+            return FunctionCall(
+                "",
+                "equal",
+                hashMapOf(Standard.CMP_LEFT to left, Standard.CMP_RIGHT to parseSimpleExpression()),
+                false
+            )
+        } else if (currentToken.compareToken(TokenType.LGREATER)) {
+            consume() // '>'
+            return FunctionCall(
+                "",
+                "lgt",
+                hashMapOf(Standard.CMP_LEFT to left, Standard.CMP_RIGHT to parseSimpleExpression()),
+                false
+            )
+        } else if (currentToken.compareToken(TokenType.RGREATER)) {
+            consume() // '<'
+            return FunctionCall(
+                "",
+                "rgt",
+                hashMapOf(Standard.CMP_LEFT to left, Standard.CMP_RIGHT to parseSimpleExpression()),
+                false
+            )
         }
 
         // Variable assignment
         if (currentToken.compareToken(TokenType.ASSIGN_RIGHT)) {
             consume() // ':='
-            return FunctionCall("", "set", hashMapOf("key" to left, "value" to parseSimpleExpression()), false)
+            left = FunctionCall("", "set", hashMapOf("key" to left, "value" to parseSimpleExpression()), false)
+        }
+
+        if (magnitude) {
+            if (!currentToken.compareToken(TokenType.VBAR))
+                throw ParseException("Expected '|' after the magnitude expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+            consume() // '|'
+
+            left = FunctionCall("", "len", hashMapOf("expr" to left), false)
         }
 
         return left
@@ -269,8 +305,11 @@ class Parser(private val tokenizer: Tokenizer) {
                 continue
             }
 
-            if (!currentToken.compareToken(closingType))
+            if (!currentToken.compareToken(closingType)) {
+                if (variadic)
+                    continue
                 throw ParseException("Could not parse function call: Expected '$closingChar' or ',' and more parameters, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+            }
 
             consume() // Skip ')' or '}'
             break
