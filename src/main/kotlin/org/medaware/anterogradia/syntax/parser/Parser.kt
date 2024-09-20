@@ -105,7 +105,7 @@ class Parser(private val tokenizer: Tokenizer) {
      */
     fun parseBlock(): FunctionCall {
         if (!currentToken.compareToken(TokenType.LCURLY))
-            throw ParseException("Expected '{', got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+            throw ParseException("Expected '{' at the beginning of a block expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
         consume() // '{'
 
@@ -129,6 +129,12 @@ class Parser(private val tokenizer: Tokenizer) {
     fun parseBindings(): Node? {
         if (currentToken.compareToken("if"))
             return parseIfConstruct()
+
+        if (currentToken.compareToken("fun"))
+            return parseFunctionDefinition()
+
+        if (currentToken.compareToken("eval"))
+            return parseFunctionEval()
 
         var result: Node? = null
 
@@ -188,6 +194,45 @@ class Parser(private val tokenizer: Tokenizer) {
                 "then" to thenFunction,
                 "else" to elseFunction
             )
+        )
+    }
+
+    fun parseFunctionEval(): FunctionCall {
+        if (!currentToken.compareToken("eval"))
+            throw ParseException("Expected identifier 'eval' at the start of an evaluation, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume() // 'eval'
+
+        if (currentToken.type != TokenType.IDENTIFIER)
+            throw ParseException("Expected identifier of function to be evaluated, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}")
+
+        val functionId = currentToken.value
+
+        consume() // Identifier
+
+        return FunctionCall("", "_eval", hashMapOf("id" to StringLiteral(functionId)), false)
+    }
+
+    fun parseFunctionDefinition(): FunctionCall {
+        if (!currentToken.compareToken("fun"))
+            throw ParseException("Expected identifier 'fun' at the start of a function definition, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume() // 'fun'
+
+        if (currentToken.type != TokenType.IDENTIFIER)
+            throw ParseException("Expected function identifier after 'fun' keyword, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        val functionId = currentToken.value
+
+        consume() // Function id
+
+        val blk = parseBlock()
+
+        return FunctionCall(
+            "", "_fun", hashMapOf(
+                "id" to StringLiteral(functionId),
+                "expr" to blk
+            ), false
         )
     }
 

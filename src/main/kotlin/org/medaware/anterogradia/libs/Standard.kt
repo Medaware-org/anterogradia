@@ -137,15 +137,15 @@ class Standard(val runtime: Runtime) {
     @DiscreteFunction(identifier = "astd", params = ["expr"])
     fun astd(n: Node): String = n.dump()
 
-    @DiscreteFunction(identifier = "fun", params = ["id", "expr"])
-    fun `fun`(name: Node, expr: Node): String {
+    @DiscreteFunction(identifier = "_fun", params = ["id", "expr"])
+    fun _fun(name: Node, expr: Node): String {
         val id = name.evaluate(runtime)
         storedFunctions[id] = expr
         return id
     }
 
-    @DiscreteFunction(identifier = "eval", params = ["id"])
-    fun eval(id: Node): String {
+    @DiscreteFunction(identifier = "_eval", params = ["id"])
+    fun _eval(id: Node): String {
         return (storedFunctions[id.evaluate(runtime)] ?: return "").evaluate(runtime)
     }
 
