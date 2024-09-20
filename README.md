@@ -190,6 +190,8 @@ When both are strings, their lexical order is compared. <br>
 Otherwise, when one expression is a string literal and the other a number, the number is compared
 to the length of the string.
 
+---
+
 ### len
 
 > :warning: *Syntax binding available*
