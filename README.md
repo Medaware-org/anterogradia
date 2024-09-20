@@ -272,3 +272,18 @@ Syntax binding
 ```
 & key
 ```
+
+### String length
+AKA _The Magnitude Operator_<br>
+
+Function form
+
+```
+len (expr)
+```
+
+Syntax binding
+
+```
+| expr |
+```
