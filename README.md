@@ -256,8 +256,8 @@ Function forms
 
 ```
 equal ( left, right )
-lgt   ( left, right)
-rgt   ( left, right)
+lgt   ( left, right )
+rgt   ( left, right )
 ```
 
 has an alternate form of
