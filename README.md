@@ -176,7 +176,7 @@ Below is a brief documentation of all the standard lib functions
 
 ### Comparison functions `lgt` and `rgt`
 
-> :warning: *Syntax binding available*
+> :warning: *Syntax bindings available*
 
 | lgt / rgt     | left       | right      |
 |---------------|------------|------------|
@@ -191,6 +191,8 @@ Otherwise, when one expression is a string literal and the other a number, the n
 to the length of the string.
 
 ### len
+
+> :warning: *Syntax binding available*
 
 | len                          | expr       |
 |------------------------------|------------|
