@@ -4,17 +4,17 @@ A custom markup system for the Medaware platform
 
 ## Example Program
 
-```js
+```kotlin
 progn {
-    "guest" := random { "Braun", "Merkel" }
+    `guest := random { "Braun", "Merkel" }
     sequence {
         "Hello, "
-        if (&"guest" = "Braun") {
+        if (&`guest = "Braun") {
             "Mr "
         } else {
             "Mrs. "
         }
-        &"guest" "!"
+        &`guest "!"
     }
 }
 ```
