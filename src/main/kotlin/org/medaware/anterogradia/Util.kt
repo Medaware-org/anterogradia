@@ -1,5 +1,6 @@
 package org.medaware.anterogradia
 
+import org.medaware.anterogradia.exception.AntgRuntimeException
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.syntax.Node
 
@@ -20,6 +21,30 @@ fun <T> Boolean.map(`if`: T, `else`: T) = if (this) `if` else `else`
 fun Pair<Double, Double>.min() = if (this.first < this.second) this.first else this.second
 
 fun Pair<Double, Double>.max() = if (this.first > this.second) this.first else this.second
+
+inline fun <reified T> String.antgNumber(): T {
+    if (T::class != Double::class && T::class != Int::class)
+        throw AntgRuntimeException("The type '${T::class.java.simpleName}' is not a valid conversion type for a number")
+
+    val double = this.toDouble()
+
+    if (T::class == Int::class && (double % 1 != 0.0))
+        throw AntgRuntimeException("Expected number to be of an effective integer type, got double ($double)")
+
+    return when (T::class) {
+        Double::class -> double
+        Int::class -> double.toInt()
+        else -> throw AntgRuntimeException("")
+    } as T
+}
+
+inline fun <reified T> String.antgNumberOrNull(): T? {
+    return try {
+        antgNumber<T>()
+    } catch (nfe: NumberFormatException) {
+        null
+    }
+}
 
 fun Throwable.rootCause(): Throwable {
     var cause = this

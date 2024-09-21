@@ -1,5 +1,7 @@
 package org.medaware.anterogradia.libs
 
+import org.medaware.anterogradia.antgNumber
+import org.medaware.anterogradia.antgNumberOrNull
 import org.medaware.anterogradia.exception.AntgRuntimeException
 import org.medaware.anterogradia.hasNonNullEntry
 import org.medaware.anterogradia.hasNullEntry
@@ -43,14 +45,14 @@ class Standard(val runtime: Runtime) {
 
     @DiscreteFunction(identifier = "repeat", params = ["count", "str"])
     fun repeat(count: Node, str: Node) = try {
-        List(count.evaluate(runtime).toInt()) { str.evaluate(runtime) }.joinToString(separator = "")
+        List(count.evaluate(runtime).antgNumber<Int>()) { str.evaluate(runtime) }.joinToString(separator = "")
     } catch (e: NumberFormatException) {
         str.evaluate(runtime)
     }
 
     @DiscreteFunction(identifier = "repeat", params = ["count", "str", "separator"])
     fun repeat(count: Node, str: Node, separator: Node) = try {
-        List(count.evaluate(runtime).toInt()) { str.evaluate(runtime) }.joinToString(
+        List(count.evaluate(runtime).antgNumber<Int>()) { str.evaluate(runtime) }.joinToString(
             separator = separator.evaluate(
                 runtime
             )
@@ -93,7 +95,7 @@ class Standard(val runtime: Runtime) {
         val leftStr = a.evaluate(runtime)
         val rightStr = b.evaluate(runtime)
 
-        val integers = (leftStr.toIntOrNull() to rightStr.toIntOrNull())
+        val integers = (leftStr.antgNumberOrNull<Int>() to rightStr.antgNumberOrNull<Int>())
 
         // If both operands are integers, perform a numerical comparison
         if (!integers.hasNullEntry())
@@ -115,7 +117,7 @@ class Standard(val runtime: Runtime) {
         val leftStr = a.evaluate(runtime)
         val rightStr = b.evaluate(runtime)
 
-        val integers = (leftStr.toIntOrNull() to rightStr.toIntOrNull())
+        val integers = (leftStr.antgNumberOrNull<Int>() to rightStr.antgNumberOrNull<Int>())
 
         // If both operands are integers, perform a numerical comparison
         if (!integers.hasNullEntry())
