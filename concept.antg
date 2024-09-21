@@ -1,11 +1,9 @@
 @library "org.medaware.anterogradia.libs.ASCII" as ascii
 
 progn {
-    fun makeProgress {
+    fun makeProgress <length> {
         `bar := sequence {
-            `[
-            repeat (count = &`length, str = "=")
-            `]
+            `[repeat (count = &`length, str = "=")`]
         }
         &`bar
     }

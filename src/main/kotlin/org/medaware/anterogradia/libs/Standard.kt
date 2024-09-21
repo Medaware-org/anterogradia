@@ -1,5 +1,6 @@
 package org.medaware.anterogradia.libs
 
+import org.medaware.anterogradia.exception.AntgRuntimeException
 import org.medaware.anterogradia.hasNonNullEntry
 import org.medaware.anterogradia.hasNullEntry
 import org.medaware.anterogradia.map
@@ -149,4 +150,11 @@ class Standard(val runtime: Runtime) {
         return (storedFunctions[id.evaluate(runtime)] ?: return "").evaluate(runtime)
     }
 
+    @DiscreteFunction(identifier = "__require_prop", params = ["id", "err"])
+    fun __require_prop(id: Node, err: Node): String {
+        if (variableStore.containsKey(id.evaluate(runtime)))
+            return ""
+
+        throw AntgRuntimeException(err.evaluate(runtime))
+    }
 }

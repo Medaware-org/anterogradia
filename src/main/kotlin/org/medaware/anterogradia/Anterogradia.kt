@@ -63,7 +63,8 @@ fun main() {
     Anterogradia.invokeCompiler(input, parameters = hashMapOf("time" to Instant.now().toString()))
         .use { input, output, except, dump ->
             if (except != null) {
-                Anterogradia.logger.log(Level.SEVERE, "${except.javaClass.simpleName}: ${except.message}")
+                val cause = except.rootCause()
+                Anterogradia.logger.log(Level.SEVERE, "${cause.javaClass.simpleName}: ${cause.message}")
             } else {
                 println(output)
             }

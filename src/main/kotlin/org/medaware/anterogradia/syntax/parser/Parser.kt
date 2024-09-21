@@ -226,7 +226,61 @@ class Parser(private val tokenizer: Tokenizer) {
 
         consume() // Function id
 
-        val blk = parseBlock()
+        var requiredParams = mutableListOf<String>()
+
+        // Required parameters list (optional)
+        if (currentToken.compareToken(TokenType.RGREATER)) {
+            consume() // '<'
+
+            while (true) {
+                if (!currentToken.compareToken(TokenType.IDENTIFIER))
+                    throw ParseException("Expected required property identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+                requiredParams.add(currentToken.value)
+
+                consume() // Identifier
+
+                if (currentToken.compareToken(TokenType.COMMA)) {
+                    consume()
+                    continue
+                }
+
+                if (currentToken.compareToken(TokenType.LGREATER)) {
+                    consume() // '>'
+                    break
+                }
+
+                throw ParseException("Could not parse required parameters list: Expected '>' or ',' and more identifiers, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+            }
+        }
+
+        var blk = parseBlock()
+
+        if (requiredParams.isNotEmpty()) {
+            var wrapperParams = hashMapOf<String, Node>()
+
+            // Generate the __require_prop calls
+            requiredParams.forEachIndexed { index, it ->
+                wrapperParams.put(
+                    index.toString(),
+                    FunctionCall(
+                        "",
+                        "__require_prop",
+                        hashMapOf(
+                            "id" to StringLiteral(it),
+                            "err" to StringLiteral("The property '$it' required for function '$functionId' was not present at the time of evaluation.")
+                        )
+                    )
+                )
+            }
+
+            // Finally, insert the original function progn
+            wrapperParams.put(requiredParams.size.toString(), blk)
+
+            blk = FunctionCall(
+                "", "progn", wrapperParams, true
+            )
+        }
 
         return FunctionCall(
             "", "_fun", hashMapOf(
