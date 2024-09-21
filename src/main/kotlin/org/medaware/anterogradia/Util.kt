@@ -34,7 +34,7 @@ inline fun <reified T> String.antgNumber(): T {
     return when (T::class) {
         Double::class -> double
         Int::class -> double.toInt()
-        else -> throw AntgRuntimeException("")
+        else -> throw AntgRuntimeException("") // Won't happen
     } as T
 }
 
