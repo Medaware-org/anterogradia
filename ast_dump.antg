@@ -1,1 +1,0 @@
-progn{_fun(expr=progn{set(value=sequence{"[",repeat(str="=",count=get(key="length")),"]"},key="bar"),get(key="bar")},id="makeProgress"),sequence{set(value="10",key="length"),_eval(id="makeProgress"),ascii:endl(),set(value="100",key="length"),_eval(id="makeProgress")}}
