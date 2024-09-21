@@ -45,9 +45,9 @@ Anterogradia.invokeCompiler(input).use { input, output, except ->
 The `invokeCompiler` method takes an optional `parameters` argument, which is a `HashMap<String, String>` of
 startup parameters that will be accessible to the script at runtime.
 
-## Working with Anterogradia - Basic Concepts
+## Core Principles of Anterogradia
 
-1) All data types are strings. Integer literals are syntactically allowed,
+1) All data types are strings. Integer and floating point literals are syntactically allowed,
    but are treated indifferently from a regular string literal.
 
 2) There are just two types of expressions: **String literals** and **Function calls**.
@@ -65,18 +65,23 @@ startup parameters that will be accessible to the script at runtime.
    imported by default.
 
 6) A function that is not a part of the standard library must be prefixed with the prefix of the library that it belongs
-   to. In the above example,
-   the functions `set` and `get` belong to the `Memory` library with the `mem` prefix and must therefore be prefixed
-   accordingly. Also, the prefix-free
-   namespace is reserved exclusively for the standard library.
+   to. In the above example, the function `endl` belongs to the `ASCII` library imported with the `ascii` prefix and must
+   therefore be prefixed accordingly. Also, the prefix-free namespace is reserved exclusively for the standard library.
 
 7) There are two types of functions: **Variadic** and **Discrete**. The former take an arbitrary number of unnamed
    parameters, discrete functions
    have a fixed number of arguments that must explicitly be assigned by name. Therefore, however, the ordering of the
    arguments does not matter.
    Discrete functions use parentheses `( .. )` and variadic functions use curly brackets `{ .. }` for their bodies (see
-   difference between `sequence` and `if`
+   difference between `sequence` and `repeat`
    in the example above).
+
+8) Difficult and unpleasant function syntax is sometimes abstracted away with **Syntax bindings** (more on them below).
+   It is very tempting to think of these constructs as the flow control constructs we know from many modern programming
+   languages, yet we shall not forget about point number **1**, namely that, say, an if expression is not a valid AST
+   element in ANTG. All syntax _bindings_ are called that for a reason: They are just _bindings_, that is, fancy syntax,
+   for function calls. It may well be worth it to take a look at a completely pure piece of ANTG source without syntax
+   bindings to get a better understanding of the concept. You might want to take a look at the `astd` function for that.
 
 ## Importing Libraries
 
@@ -96,7 +101,7 @@ consecutively after each-other, i.e.
 @library "org.medaware.anterogradia.libs.FormattingLib" as fmt
 
 sequence {
-...
+    ...
 ```
 
 ## Standard Library
@@ -200,6 +205,14 @@ Below is a brief documentation of all the standard lib functions
 | get                                         | key           |
 |---------------------------------------------|---------------|
 | Retrieves the value of an existing variable | variable name |
+
+---
+
+### compile
+
+| compile                                                         | source               |
+|-----------------------------------------------------------------|----------------------|
+| Invokes the ANTG compiler with the current runtime and 'source' | ANTG Code to compile |
 
 ---
 
