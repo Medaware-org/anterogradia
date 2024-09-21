@@ -83,10 +83,7 @@ startup parameters that will be accessible to the script at runtime.
 Additional libs can be imported from within the script using the following syntax:
 
 ```js
-@library
-"path.to.library.Clazz"
-as
-identifier 
+@library "path.to.library.Clazz" as identifier 
 ```
 
 Where `identifier` is the prefix to be used when referring to the library's functions.
@@ -94,21 +91,11 @@ Note that the import directives must be placed at the very top of the file and m
 consecutively after each-other, i.e.
 
 ```js
-@library
-"org.medaware.anterogradia.libs.HTML"
-as
-h
-@library
-"org.medaware.anterogradia.libs.MedawareDesignToolkit"
-as
-mdk
-@library
-"org.medaware.anterogradia.libs.FormattingLib"
-as
-fmt
+@library "org.medaware.anterogradia.libs.HTML" as h
+@library "org.medaware.anterogradia.libs.MedawareDesignToolkit" as mdk
+@library "org.medaware.anterogradia.libs.FormattingLib" as fmt
 
-sequence
-{
+sequence {
 ...
 ```
 
