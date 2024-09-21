@@ -1,12 +1,20 @@
+@library "org.medaware.anterogradia.libs.ASCII" as ascii
+
 progn {
-    `guest := random { `Braun, `Merkel }
-    sequence {
-        "Hello, "
-        if (&`guest = `Braun) {
-            "Mr "
-        } else {
-            "Mrs. "
+    fun makeProgress <length> {
+        `bar := sequence {
+            `[repeat (count = &`length, str = "=")`]
         }
-        &`guest `!
+        &`bar
+    }
+
+    sequence {
+        `length := 10
+        eval makeProgress
+
+        ascii:endl()
+
+        `length := 100
+        eval makeProgress
     }
 }

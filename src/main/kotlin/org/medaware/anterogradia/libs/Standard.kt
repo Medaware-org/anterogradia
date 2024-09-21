@@ -1,5 +1,6 @@
 package org.medaware.anterogradia.libs
 
+import org.medaware.anterogradia.exception.AntgRuntimeException
 import org.medaware.anterogradia.hasNonNullEntry
 import org.medaware.anterogradia.hasNullEntry
 import org.medaware.anterogradia.map
@@ -21,6 +22,8 @@ class Standard(val runtime: Runtime) {
     }
 
     private val variableStore = hashMapOf<String, String>()
+
+    private val storedFunctions = hashMapOf<String, Node>()
 
     @DiscreteFunction(identifier = "about")
     fun about(): String = "Anterogradia Standard Library\n{C} Medaware, 2024\n"
@@ -60,7 +63,7 @@ class Standard(val runtime: Runtime) {
     fun random(strings: Array<Node>): String = strings.random().evaluate(runtime)
 
     @DiscreteFunction(identifier = "param", params = ["key"])
-    fun parameter(id: Node): String = runtime.parameters[id.evaluate(runtime)] ?: ""
+    fun param(id: Node): String = runtime.parameters[id.evaluate(runtime)] ?: ""
 
     @DiscreteFunction(identifier = "set", params = ["key", "value"])
     fun set(key: Node, value: Node): String {
@@ -71,12 +74,8 @@ class Standard(val runtime: Runtime) {
     @DiscreteFunction(identifier = "get", params = ["key"])
     fun get(key: Node): String = variableStore[key.evaluate(runtime)] ?: ""
 
-    //
-    // Boolean operations
-    //
-
     @DiscreteFunction(identifier = "_if", params = ["cond", "then", "else"])
-    fun evalIf(str: Node, then: Node, _else: Node): String {
+    fun _if(str: Node, then: Node, _else: Node): String {
         val condStr = str.evaluate(runtime)
 
         if (condStr == "true" || condStr == "yes") {
@@ -90,7 +89,7 @@ class Standard(val runtime: Runtime) {
     fun equal(left: Node, right: Node): String = if (left.evaluate(runtime) == right.evaluate(runtime)) TRUE else FALSE
 
     @DiscreteFunction(identifier = "lgt", params = [CMP_LEFT, CMP_RIGHT])
-    fun leftGreater(a: Node, b: Node): String {
+    fun lgt(a: Node, b: Node): String {
         val leftStr = a.evaluate(runtime)
         val rightStr = b.evaluate(runtime)
 
@@ -112,7 +111,7 @@ class Standard(val runtime: Runtime) {
     }
 
     @DiscreteFunction(identifier = "rgt", params = [CMP_LEFT, CMP_RIGHT])
-    fun rightGreater(a: Node, b: Node): String {
+    fun rgt(a: Node, b: Node): String {
         val leftStr = a.evaluate(runtime)
         val rightStr = b.evaluate(runtime)
 
@@ -134,9 +133,28 @@ class Standard(val runtime: Runtime) {
     }
 
     @DiscreteFunction(identifier = "len", params = ["expr"])
-    fun length(expr: Node): String = expr.evaluate(runtime).length.toString()
+    fun len(expr: Node): String = expr.evaluate(runtime).length.toString()
 
     @DiscreteFunction(identifier = "astd", params = ["expr"])
     fun astd(n: Node): String = n.dump()
 
+    @DiscreteFunction(identifier = "_fun", params = ["id", "expr"])
+    fun _fun(name: Node, expr: Node): String {
+        val id = name.evaluate(runtime)
+        storedFunctions[id] = expr
+        return id
+    }
+
+    @DiscreteFunction(identifier = "_eval", params = ["id"])
+    fun _eval(id: Node): String {
+        return (storedFunctions[id.evaluate(runtime)] ?: return "").evaluate(runtime)
+    }
+
+    @DiscreteFunction(identifier = "__require_prop", params = ["id", "err"])
+    fun __require_prop(id: Node, err: Node): String {
+        if (variableStore.containsKey(id.evaluate(runtime)))
+            return ""
+
+        throw AntgRuntimeException(err.evaluate(runtime))
+    }
 }

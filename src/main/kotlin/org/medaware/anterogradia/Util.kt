@@ -20,3 +20,11 @@ fun <T> Boolean.map(`if`: T, `else`: T) = if (this) `if` else `else`
 fun Pair<Double, Double>.min() = if (this.first < this.second) this.first else this.second
 
 fun Pair<Double, Double>.max() = if (this.first > this.second) this.first else this.second
+
+fun Throwable.rootCause(): Throwable {
+    var cause = this
+    while (cause.cause != null) {
+        cause = cause.cause!!
+    }
+    return cause
+}

@@ -105,7 +105,7 @@ class Parser(private val tokenizer: Tokenizer) {
      */
     fun parseBlock(): FunctionCall {
         if (!currentToken.compareToken(TokenType.LCURLY))
-            throw ParseException("Expected '{', got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+            throw ParseException("Expected '{' at the beginning of a block expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
         consume() // '{'
 
@@ -129,6 +129,12 @@ class Parser(private val tokenizer: Tokenizer) {
     fun parseBindings(): Node? {
         if (currentToken.compareToken("if"))
             return parseIfConstruct()
+
+        if (currentToken.compareToken("fun"))
+            return parseFunctionDefinition()
+
+        if (currentToken.compareToken("eval"))
+            return parseFunctionEval()
 
         var result: Node? = null
 
@@ -188,6 +194,99 @@ class Parser(private val tokenizer: Tokenizer) {
                 "then" to thenFunction,
                 "else" to elseFunction
             )
+        )
+    }
+
+    fun parseFunctionEval(): FunctionCall {
+        if (!currentToken.compareToken("eval"))
+            throw ParseException("Expected identifier 'eval' at the start of an evaluation, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume() // 'eval'
+
+        if (currentToken.type != TokenType.IDENTIFIER)
+            throw ParseException("Expected identifier of function to be evaluated, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}")
+
+        val functionId = currentToken.value
+
+        consume() // Identifier
+
+        return FunctionCall("", "_eval", hashMapOf("id" to StringLiteral(functionId)), false)
+    }
+
+    fun parseFunctionDefinition(): FunctionCall {
+        if (!currentToken.compareToken("fun"))
+            throw ParseException("Expected identifier 'fun' at the start of a function definition, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume() // 'fun'
+
+        if (currentToken.type != TokenType.IDENTIFIER)
+            throw ParseException("Expected function identifier after 'fun' keyword, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        val functionId = currentToken.value
+
+        consume() // Function id
+
+        var requiredParams = mutableListOf<String>()
+
+        // Required parameters list (optional)
+        if (currentToken.compareToken(TokenType.RGREATER)) {
+            consume() // '<'
+
+            while (true) {
+                if (!currentToken.compareToken(TokenType.IDENTIFIER))
+                    throw ParseException("Expected required property identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+                requiredParams.add(currentToken.value)
+
+                consume() // Identifier
+
+                if (currentToken.compareToken(TokenType.COMMA)) {
+                    consume()
+                    continue
+                }
+
+                if (currentToken.compareToken(TokenType.LGREATER)) {
+                    consume() // '>'
+                    break
+                }
+
+                throw ParseException("Could not parse required parameters list: Expected '>' or ',' and more identifiers, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+            }
+        }
+
+        var blk = parseBlock()
+
+        if (requiredParams.isNotEmpty()) {
+            var wrapperParams = hashMapOf<String, Node>()
+
+            // Generate the __require_prop calls
+            requiredParams.forEachIndexed { index, it ->
+                wrapperParams.put(
+                    index.toString(),
+                    FunctionCall(
+                        "",
+                        "__require_prop",
+                        hashMapOf(
+                            "id" to StringLiteral(it),
+                            "err" to StringLiteral("The property '$it' required for function '$functionId' was not present at the time of evaluation.")
+                        )
+                    )
+                )
+            }
+
+            // Finally, insert the original function progn
+            wrapperParams.put(requiredParams.size.toString(), blk)
+
+            blk = FunctionCall(
+                "", "progn", wrapperParams, true
+            )
+        }
+
+        return FunctionCall(
+            "", "_fun", hashMapOf(
+                "id" to StringLiteral(functionId),
+                "expr" to blk
+            ), false
         )
     }
 

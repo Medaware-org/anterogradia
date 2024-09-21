@@ -13,8 +13,8 @@ import java.util.logging.LogRecord
 import java.util.logging.Logger
 import java.util.logging.SimpleFormatter
 
-data class AnterogradiaResult(val input: String, val output: String, val exception: Exception? = null) {
-    fun <T> use(lambda: (input: String, output: String, except: Exception?) -> T) = lambda(input, output, exception)
+data class AnterogradiaResult(val input: String, val output: String, val exception: Exception? = null, val dump: String) {
+    fun <T> use(lambda: (input: String, output: String, except: Exception?, dump: String) -> T) = lambda(input, output, exception, dump)
 }
 
 object Anterogradia {
@@ -36,11 +36,13 @@ object Anterogradia {
     fun invokeCompiler(input: String, parameters: HashMap<String, String> = hashMapOf()): AnterogradiaResult {
         var result: String
         var except: Exception? = null
+        var dump = ""
 
         val runtime = Runtime(parameters)
 
         try {
             val script = Parser.parseScript(input)
+            dump = script.expression.dump()
             script.libs.forEach { lib ->
                 runtime.loadLibrary(lib.first, lib.second)
             }
@@ -50,7 +52,7 @@ object Anterogradia {
             result = ""
         }
 
-        return AnterogradiaResult(input, result, except)
+        return AnterogradiaResult(input, result, except, dump)
     }
 }
 
@@ -59,9 +61,10 @@ fun main() {
     val input = Files.readString(Path.of("concept.antg"))
 
     Anterogradia.invokeCompiler(input, parameters = hashMapOf("time" to Instant.now().toString()))
-        .use { input, output, except ->
+        .use { input, output, except, dump ->
             if (except != null) {
-                Anterogradia.logger.log(Level.SEVERE, "${except.javaClass.simpleName}: ${except.message}")
+                val cause = except.rootCause()
+                Anterogradia.logger.log(Level.SEVERE, "${cause.javaClass.simpleName}: ${cause.message}")
             } else {
                 println(output)
             }

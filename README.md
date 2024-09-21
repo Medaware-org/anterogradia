@@ -5,17 +5,25 @@ A custom markup system for the Medaware platform
 ## Example Program
 
 ```kotlin
+@library "org.medaware.anterogradia.libs.ASCII" as ascii
+
 progn {
-    `guest := random { `Braun, `Merkel }
-    sequence {
-        "Hello, "
-        if (&`guest = `Braun) {
-            "Mr "
-        } else {
-            "Mrs. "
-        }
-        &`guest `!
-    }
+   fun makeProgress <length> {
+      `bar := sequence {
+         `[repeat (count = &`length, str = "=")`]
+      }
+      &`bar
+   }
+
+   sequence {
+      `length := 10
+      eval makeProgress
+
+      ascii:endl()
+
+      `length := 100
+      eval makeProgress
+   }
 }
 ```
 
@@ -71,20 +79,24 @@ startup parameters that will be accessible to the script at runtime.
    in the example above).
 
 ## Importing Libraries
+
 Additional libs can be imported from within the script using the following syntax:
+
 ```js
 @library "path.to.library.Clazz" as identifier 
 ```
+
 Where `identifier` is the prefix to be used when referring to the library's functions.
 Note that the import directives must be placed at the very top of the file and must occur
 consecutively after each-other, i.e.
+
 ```js
 @library "org.medaware.anterogradia.libs.HTML" as h
 @library "org.medaware.anterogradia.libs.MedawareDesignToolkit" as mdk
 @library "org.medaware.anterogradia.libs.FormattingLib" as fmt
 
 sequence {
-    ...
+...
 ```
 
 ## Standard Library
@@ -225,6 +237,40 @@ to the length of the string.
 |-------------------------------------------------------|------------|
 | Generate valid ANTG source string from the expression | Expression |
 
+---
+
+### _fun
+
+> :warning: *Syntax binding available*
+
+| _fun                                                                            | id              | expr       |
+|---------------------------------------------------------------------------------|-----------------|------------|
+| Stores the 'expr' as 'id' as an expression node to be evaluated at a later time | The function id | Expression |
+
+---
+
+### _eval
+
+> :warning: *Syntax binding available*
+
+| _eval                                           | id            |
+|-------------------------------------------------|---------------|
+| Evaluates a function stored under the name 'id' | Function name |
+
+---
+
+### __require_prop
+
+> :warning: *You should probably not write it manually; use the second variant of the function definition syntax binding*
+
+| __require_prop                                                                                                   | id         | err        |
+|------------------------------------------------------------------------------------------------------------------|------------|------------|
+| Checks whether the variable 'id' exists (stdlib). If not, the runtime throws an exception with the 'err' message | Expression | Expression |
+
+This function is automatically generated in the block of a function definition whenever the required properties syntax is used.
+
+---
+
 ## Syntax bindings
 
 To improve developer experience, some functions or expressions can be written in the form of dedicated syntactical
@@ -297,6 +343,7 @@ Syntax binding
 ```
 
 ### String length
+
 AKA _The Magnitude Operator_<br>
 
 Function form
@@ -311,5 +358,43 @@ Syntax binding
 | expr |
 ```
 
+### Function definitions
+
+Function form
+
+```
+_fun ( id, expr )
+```
+
+Syntax binding
+
+```
+fun id { expr }
+```
+
+OR
+
+```
+fun id <required params> { expr }
+```
+
+where `required params` is a comma-separated list of identifiers that defined the list of parameters that the function
+depends on and that need to be present at the time of evaluation.
+
+### Function evaluation
+
+Function form
+
+```
+_eval ( id )
+```
+
+Syntax binding
+
+```
+eval id
+```
+
 ## Additional Syntax
+
 Every token that follows a backtick `` ` `` is internally converted to a string literal.
