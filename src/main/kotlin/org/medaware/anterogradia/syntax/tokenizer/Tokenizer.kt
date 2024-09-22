@@ -19,7 +19,7 @@ class Tokenizer(private var inputString: String) {
         lastToken = Token.undefinedToken(lineNumber)
 
         tokenParsers =
-            arrayOf(::parseIdentifier, ::parseIntegerLiteral, ::parseStringMatchedToken, ::parseStringLiteralToken)
+            arrayOf(::parseIdentifier, ::parseNumberLiteral, ::parseStringMatchedToken, ::parseStringLiteralToken)
     }
 
     fun nextToken(): Token {
@@ -115,7 +115,7 @@ class Tokenizer(private var inputString: String) {
         return Token(TokenType.IDENTIFIER, buffer.toString(), lineNumber)
     }
 
-    fun parseIntegerLiteral(): Token {
+    fun parseNumberLiteral(): Token {
         if (!isDigit(input.firstOrNull() ?: return Token.undefinedToken(lineNumber)))
             return Token.undefinedToken(lineNumber)
 
@@ -123,14 +123,29 @@ class Tokenizer(private var inputString: String) {
 
         var tokenLength: Int = 0
 
+        var decimalPresent = false
+        var isCharAfterDecimal = false
+
         // All remaining characters
         for (char in input) {
-            if (!isDigit(char))
-                break
+            if (!isDigit(char)) {
+                if (char == '.') {
+                    if (decimalPresent)
+                        throw LexerException("A floating point literal may not have more than a single decimal comma. Error on line ${this.lineNumber}.")
+                    decimalPresent = true
+                    isCharAfterDecimal = true
+                } else break
+            }
 
             buffer.append(char)
             tokenLength++
+
+            if (char != '.')
+                isCharAfterDecimal = false
         }
+
+        if (isCharAfterDecimal)
+            throw LexerException("Expected further digits after floating point comma on line ${this.lineNumber}.")
 
         input.advance(tokenLength)
 
