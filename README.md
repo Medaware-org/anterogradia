@@ -32,9 +32,9 @@ progn {
 The minimalistic Kotlin API is based around a single function that returns an `AnterogradiaResult` object.
 This object can be directly processed via the `use` function, which exposes all of its components:
 
-| input          | output          | except       |
-|----------------|-----------------|--------------|
-| The input code | Compiled output | `Exception?` |
+| input          | output          | except       | dump                                                                                  |
+|----------------|-----------------|--------------|---------------------------------------------------------------------------------------|
+| The input code | Compiled output | `Exception?` | ANTG output generated from the parser's AST. Just like `astd` over the entire program |
 
 ```kotlin
 Anterogradia.invokeCompiler(input).use { input, output, except, dump ->
@@ -44,7 +44,7 @@ Anterogradia.invokeCompiler(input).use { input, output, except, dump ->
 
 The `invokeCompiler` method takes an optional `parameters` argument, which is a `HashMap<String, String>` of
 startup parameters that will be accessible to the script at runtime.
-The parameter `dump` is the ANTG output generated from the parser's AST. Similar to invoking `astd` on the entire program.
+The function also accepts a `runtime` parameter.
 
 ## Core Principles of Anterogradia
 
