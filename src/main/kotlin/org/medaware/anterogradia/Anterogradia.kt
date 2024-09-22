@@ -1,5 +1,6 @@
 package org.medaware.anterogradia
 
+import org.medaware.anterogradia.exception.AntgRuntimeException
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.syntax.parser.Parser
 import java.nio.file.Files
@@ -13,8 +14,14 @@ import java.util.logging.LogRecord
 import java.util.logging.Logger
 import java.util.logging.SimpleFormatter
 
-data class AnterogradiaResult(val input: String, val output: String, val exception: Exception? = null, val dump: String) {
-    fun <T> use(lambda: (input: String, output: String, except: Exception?, dump: String) -> T) = lambda(input, output, exception, dump)
+data class AnterogradiaResult(
+    val input: String,
+    val output: String,
+    val exception: Exception? = null,
+    val dump: String
+) {
+    fun <T> use(lambda: (input: String, output: String, except: Exception?, dump: String) -> T) =
+        lambda(input, output, exception, dump)
 }
 
 object Anterogradia {
@@ -33,12 +40,19 @@ object Anterogradia {
         logger.useParentHandlers = false
     }
 
-    fun invokeCompiler(input: String, parameters: HashMap<String, String> = hashMapOf()): AnterogradiaResult {
+    fun invokeCompiler(
+        input: String,
+        parameters: HashMap<String, String>? = null,
+        antgRuntime: Runtime? = null
+    ): AnterogradiaResult {
+        if (parameters != null && antgRuntime != null || parameters == null && antgRuntime == null)
+            throw AntgRuntimeException("Either the runtime parameter or the runtime itself has to be provided.")
+
         var result: String
         var except: Exception? = null
         var dump = ""
 
-        val runtime = Runtime(parameters)
+        val runtime = antgRuntime ?: Runtime(parameters!!)
 
         try {
             val script = Parser.parseScript(input)

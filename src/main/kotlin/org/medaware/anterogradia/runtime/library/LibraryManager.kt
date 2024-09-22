@@ -146,10 +146,15 @@ class LibraryManager {
             if (variadicFunctions.size != 1)
                 throw FunctionCallException("There is more than one variadic function of the same name ('${name}'). This should never happen!")
 
-            val params = args.values.toTypedArray()
+            val paramsList = mutableListOf<Node>()
+
+            args.keys.map { it.toInt() }.sorted().forEach {
+                paramsList.add(args[it.toString()]!!)
+            }
+
             val instance = runtime.libInstance(lib)
 
-            return variadicFunctions.first().first.invoke(instance, params) as String
+            return variadicFunctions.first().first.invoke(instance, paramsList.toTypedArray()) as String
         }
 
         if (variadic)

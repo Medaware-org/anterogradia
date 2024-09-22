@@ -17,4 +17,12 @@ progn {
         `length := 100
         eval makeProgress
     }
+
+    compile (source = sequence {
+        `sequence `{
+            `ascii`:`quo`(`)
+            astd(expr = "Hello, World!")
+            `ascii`:`quo`(`)
+        `}
+    })
 }

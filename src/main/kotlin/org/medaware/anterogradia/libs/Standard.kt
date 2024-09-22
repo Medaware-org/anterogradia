@@ -1,11 +1,13 @@
 package org.medaware.anterogradia.libs
 
+import org.medaware.anterogradia.Anterogradia
 import org.medaware.anterogradia.antgNumber
 import org.medaware.anterogradia.antgNumberOrNull
 import org.medaware.anterogradia.exception.AntgRuntimeException
 import org.medaware.anterogradia.hasNonNullEntry
 import org.medaware.anterogradia.hasNullEntry
 import org.medaware.anterogradia.map
+import org.medaware.anterogradia.rootCause
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.DiscreteFunction
@@ -159,4 +161,14 @@ class Standard(val runtime: Runtime) {
 
         throw AntgRuntimeException(err.evaluate(runtime))
     }
+
+    @DiscreteFunction(identifier = "compile", params = ["source"])
+    fun compile(source: Node): String = Anterogradia.invokeCompiler(source.evaluate(runtime), antgRuntime = runtime)
+        .use { input, output, except, dump ->
+            if (except != null)
+                throw AntgRuntimeException("Error occurred while evaluating compile expression: ${except.rootCause().message}")
+
+            return@use output
+        }
+
 }
