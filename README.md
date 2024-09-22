@@ -37,13 +37,14 @@ This object can be directly processed via the `use` function, which exposes all 
 | The input code | Compiled output | `Exception?` |
 
 ```kotlin
-Anterogradia.invokeCompiler(input).use { input, output, except ->
+Anterogradia.invokeCompiler(input).use { input, output, except, dump ->
     /* Process the result */
 }
 ```
 
 The `invokeCompiler` method takes an optional `parameters` argument, which is a `HashMap<String, String>` of
 startup parameters that will be accessible to the script at runtime.
+The parameter `dump` is the ANTG output generated from the parser's AST. Similar to invoking `astd` on the entire program.
 
 ## Core Principles of Anterogradia
 
