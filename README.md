@@ -293,11 +293,11 @@ Performs an arithmetic operation on the operands `left` and `right`.
 |---------------|------------|------------|
 | _(See below)_ | Expression | Expression |
 
-Available operations are:
-`add` - `left + right`
-`sub` - `left - right`
-`mul` - `left * right`
-`div` - `left / right`
+Available operations are: <br/>
+`add` - `left + right` <br/>
+`sub` - `left - right` <br/>
+`mul` - `left * right` <br/>
+`div` - `left / right` <br/>
 `mod` - `left % right`
 
 ---
