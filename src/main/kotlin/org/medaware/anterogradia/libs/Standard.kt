@@ -171,4 +171,54 @@ class Standard(val runtime: Runtime) {
             return@use output
         }
 
+    @DiscreteFunction(identifier = "add", params = ["left", "right"])
+    fun add(left: Node, right: Node): String =
+        (left.evaluate(runtime).antgNumber<Double>() + right.evaluate(runtime).antgNumber<Double>()).toString()
+
+    @DiscreteFunction(identifier = "sub", params = ["left", "right"])
+    fun sub(left: Node, right: Node): String =
+        (left.evaluate(runtime).antgNumber<Double>() - right.evaluate(runtime).antgNumber<Double>()).toString()
+
+    @DiscreteFunction(identifier = "mul", params = ["left", "right"])
+    fun mul(left: Node, right: Node): String =
+        (left.evaluate(runtime).antgNumber<Double>() * right.evaluate(runtime).antgNumber<Double>()).toString()
+
+    @DiscreteFunction(identifier = "div", params = ["left", "right"])
+    fun div(left: Node, right: Node): String =
+        (left.evaluate(runtime).antgNumber<Double>() / right.evaluate(runtime).antgNumber<Double>()).toString()
+
+    @DiscreteFunction(identifier = "mod", params = ["left", "right"])
+    fun mod(left: Node, right: Node): String =
+        (left.evaluate(runtime).antgNumber<Double>() % right.evaluate(runtime).antgNumber<Double>()).toString()
+
+    @DiscreteFunction(identifier = "vsignflp", params = ["id"])
+    fun vsignflp(id: Node): String {
+        val key = id.evaluate(runtime)
+        if (variableStore[key] == null)
+            return "0.0"
+        variableStore[key] = (variableStore[key]!!.antgNumber<Double>() * (-1.0)).toString()
+        return variableStore[key]!!
+    }
+
+    @DiscreteFunction(identifier = "signflp", params = ["expr"])
+    fun signflp(expr: Node): String = (expr.evaluate(runtime).antgNumber<Double>() * (-1.0)).toString()
+
+    @DiscreteFunction(identifier = "increment", params = ["id"])
+    fun increment(id: Node): String {
+        val key = id.evaluate(runtime)
+        if (variableStore[key] == null)
+            return "0.0"
+        variableStore[key] = (variableStore[key]!!.antgNumber<Double>() + 1.0).toString()
+        return variableStore[key]!!
+    }
+
+    @DiscreteFunction(identifier = "decrement", params = ["id"])
+    fun decrement(id: Node): String {
+        val key = id.evaluate(runtime)
+        if (variableStore[key] == null)
+            return "0.0"
+        variableStore[key] = (variableStore[key]!!.antgNumber<Double>() - 1.0).toString()
+        return variableStore[key]!!
+    }
+
 }

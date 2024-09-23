@@ -1,6 +1,5 @@
 package org.medaware.anterogradia.runtime
 
-import org.medaware.anterogradia.Anterogradia
 import org.medaware.anterogradia.exception.LibraryException
 import org.medaware.anterogradia.libs.Standard
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
