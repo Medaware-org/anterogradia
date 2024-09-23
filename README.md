@@ -285,6 +285,56 @@ This function is automatically generated in the block of a function definition w
 
 ---
 
+### Arithmetic Operations
+
+Performs an arithmetic operation on the operands `left` and `right`.
+
+| ( operation ) | left       | right      |
+|---------------|------------|------------|
+| _(See below)_ | Expression | Expression |
+
+Available operations are: <br/>
+`add` - `left + right` <br/>
+`sub` - `left - right` <br/>
+`mul` - `left * right` <br/>
+`div` - `left / right` <br/>
+`mod` - `left % right`
+
+---
+
+### signflp
+
+| signflp                                            | expr       |
+|----------------------------------------------------|------------|
+| Flips the sign of expression and returns the value | Expression |
+
+---
+
+### vsignflp
+
+| vsignflp                                                                                 | id                     |
+|------------------------------------------------------------------------------------------|------------------------|
+| Flips the sign of the value stored in variable 'id' and stores it in the source variable | Source/target variable |
+
+---
+
+### increment
+
+| increment                                            | id                     |
+|------------------------------------------------------|------------------------|
+| Increments the numeric value stored in variable 'id' | Source/target variable |
+
+---
+
+### decrement
+
+| decrement                                            | id                     |
+|------------------------------------------------------|------------------------|
+| Decrements the numeric value stored in variable 'id' | Source/target variable |
+
+
+---
+
 ## Syntax bindings
 
 To improve developer experience, some functions or expressions can be written in the form of dedicated syntactical

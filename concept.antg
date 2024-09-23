@@ -1,28 +1,4 @@
-@library "org.medaware.anterogradia.libs.ASCII" as ascii
-
 progn {
-    fun makeProgress <length> {
-        `bar := sequence {
-            `[repeat (count = &`length, str = "=")`]
-        }
-        &`bar
-    }
-
-    sequence {
-        `length := 10
-        eval makeProgress
-
-        ascii:endl()
-
-        `length := 100
-        eval makeProgress
-    }
-
-    compile (source = sequence {
-        `sequence `{
-            `ascii`:`quo`(`)
-            astd(expr = "Hello, World!")
-            `ascii`:`quo`(`)
-        `}
-    })
+    `abc := 123
+    signflp(expr = &`abc)
 }
