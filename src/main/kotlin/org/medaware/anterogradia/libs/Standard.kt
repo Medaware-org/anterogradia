@@ -63,7 +63,7 @@ class Standard(val runtime: Runtime) {
     }
 
     @VariadicFunction(identifier = "random")
-    fun random(strings: Array<Node>): String = strings.random().evaluate(runtime)
+    fun random(String: Array<Node>): String = String.random().evaluate(runtime)
 
     @DiscreteFunction(identifier = "param", params = ["key"])
     fun param(id: Node): String = runtime.parameters[id.evaluate(runtime)] ?: ""

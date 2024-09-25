@@ -1,9 +1,3 @@
-progn {
-   fun doStuff <a, b, c> {
-      sequence { &`a &`b &`c }
-   }
+@library "org.medaware.anterogradia.libs.Strings" as str
 
-   sequence {
-      eval doStuff(a = "He", b = "llo, ", c = "World!")
-   }
-}
+str.contains(str = str.upper(str = "Hello, World!"), substr = str.upper(str = "hello"))
