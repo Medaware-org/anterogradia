@@ -32,6 +32,7 @@ enum class TokenType(val value: String? = null) {
     HAT("^"),
     AT("@"),
     HASH("#"),
+    DOT("."),
     EXCLAMATION("!"),
 
     // Complex tokens

@@ -19,7 +19,7 @@ progn {
       `length := 10
       eval makeProgress
 
-      ascii:endl()
+      ascii.endl()
 
       `length := 100
       eval makeProgress

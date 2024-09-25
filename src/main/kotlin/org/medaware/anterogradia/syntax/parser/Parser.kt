@@ -206,6 +206,28 @@ class Parser(private val tokenizer: Tokenizer) {
         if (currentToken.type != TokenType.IDENTIFIER)
             throw ParseException("Expected identifier of function to be evaluated, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}")
 
+        // Parse stored expression call
+        if (nextToken.type == TokenType.LPAREN) {
+            val line = currentToken.line
+            val call = parseFunctionCall()
+            if (call.variadic)
+                throw ParseException("A function called via 'eval' must not be variadic. Error on line $line.")
+
+            val prep = call.arguments.keys.map { arg ->
+                FunctionCall("", "set", hashMapOf("key" to StringLiteral(arg), "value" to call.arguments[arg]!!))
+            }.toMutableList()
+
+            prep.add(FunctionCall("", "_eval", hashMapOf("id" to StringLiteral(call.identifier)), false))
+
+            val map = hashMapOf<String, Node>()
+
+            prep.forEachIndexed { index, it ->
+                map.put(index.toString(), it)
+            }
+
+            return FunctionCall("", "progn", map, true)
+        }
+
         val functionId = currentToken.value
 
         consume() // Identifier
@@ -344,13 +366,13 @@ class Parser(private val tokenizer: Tokenizer) {
 
         // The token could either be a lib prefix or the function identifier
 
-        if (nextToken.compareToken(TokenType.COLON)) {
+        if (nextToken.compareToken(TokenType.DOT)) {
             libPrefix = currentToken.value
 
             consume() // Skip the lib prefix
 
             if (!nextToken.compareToken(TokenType.IDENTIFIER))
-                throw ParseException("Expected function identifier after lib prefix colon, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line} instead.")
+                throw ParseException("Expected function identifier after lib prefix dot, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line} instead.")
 
             consume() // Skip ':'
 

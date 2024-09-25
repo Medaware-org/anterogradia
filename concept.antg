@@ -1,4 +1,9 @@
-progn {
-    `abc := 123
-    signflp(expr = &`abc)
-}
+astd(expr = progn {
+   fun doStuff <a, b, c> {
+      sequence { &`a &`b &`c }
+   }
+
+   sequence {
+      eval doStuff(a = "He", b = "llo, ", c = "World!")
+   }
+})
