@@ -449,7 +449,7 @@ depends on and that need to be present at the time of evaluation.
 
 Function form
 
-```
+```js
 _eval ( id )
 ```
 
@@ -458,6 +458,17 @@ Syntax binding
 ```
 eval id
 ```
+
+An alternative syntax binding that closely resembles a library function call allows for inline declaration of the required parameters
+
+```
+eval id (param1 = expr, param2 = expr, ...)
+```
+
+Please note that since this feature is implemented as a syntax binding, the parser, which does not have the notion of (stored) functions or
+variables, is unable to check for the validity of the parameters. Thus, you may provide an insufficient number of parameters, which will result in the
+standard library raising an exception at runtime. You may, however, also provide other parameters which are not required by the callee; this will not cause
+any errors, and will simply result in these variables being set as usual.
 
 ## Additional Syntax
 
