@@ -1,4 +1,14 @@
 progn {
-    `abc := 123
-    signflp(expr = &`abc)
+   fun makeProgress <length> {
+      `bar := sequence {
+         `[repeat (count = &`length, str = "=")`]
+      }
+      &`bar
+   }
+
+   sequence {
+      eval makeProgress(length = 10)
+      ascii.endl()
+      eval makeProgress(length = 100)
+   }
 }
