@@ -1,4 +1,4 @@
-astd(expr = progn {
+progn {
    fun doStuff <a, b, c> {
       sequence { &`a &`b &`c }
    }
@@ -6,4 +6,4 @@ astd(expr = progn {
    sequence {
       eval doStuff(a = "He", b = "llo, ", c = "World!")
    }
-})
+}

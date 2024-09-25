@@ -26,8 +26,7 @@ class Standard(val runtime: Runtime) {
     }
 
     private val variableStore = hashMapOf<String, String>()
-
-    private val storedFunctions = hashMapOf<String, Node>()
+    private val functionStore = hashMapOf<String, Node>()
 
     @DiscreteFunction(identifier = "about")
     fun about(): String = "Anterogradia Standard Library\n{C} Medaware, 2024\n"
@@ -145,13 +144,13 @@ class Standard(val runtime: Runtime) {
     @DiscreteFunction(identifier = "_fun", params = ["id", "expr"])
     fun _fun(name: Node, expr: Node): String {
         val id = name.evaluate(runtime)
-        storedFunctions[id] = expr
+        functionStore[id] = expr
         return id
     }
 
     @DiscreteFunction(identifier = "_eval", params = ["id"])
     fun _eval(id: Node): String {
-        val stored = storedFunctions[id.evaluate(runtime)]
+        val stored = functionStore[id.evaluate(runtime)]
         if (stored == null)
             throw AntgRuntimeException("Could not find stored function '${id.evaluate(runtime)}'.")
         return stored.evaluate(runtime)
