@@ -1,14 +1,9 @@
-progn {
-   fun makeProgress <length> {
-      `bar := sequence {
-         `[repeat (count = &`length, str = "=")`]
-      }
-      &`bar
+astd(expr = progn {
+   fun doStuff <a, b, c> {
+      sequence { &`a &`b &`c }
    }
 
    sequence {
-      eval makeProgress(length = 10)
-      ascii.endl()
-      eval makeProgress(length = 100)
+      eval doStuff(a = "He", b = "llo, ", c = "World!")
    }
-}
+})

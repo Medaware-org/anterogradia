@@ -151,7 +151,10 @@ class Standard(val runtime: Runtime) {
 
     @DiscreteFunction(identifier = "_eval", params = ["id"])
     fun _eval(id: Node): String {
-        return (storedFunctions[id.evaluate(runtime)] ?: return "").evaluate(runtime)
+        val stored = storedFunctions[id.evaluate(runtime)]
+        if (stored == null)
+            throw AntgRuntimeException("Could not find stored function '${id.evaluate(runtime)}'.")
+        return stored.evaluate(runtime)
     }
 
     @DiscreteFunction(identifier = "__require_prop", params = ["id", "err"])
