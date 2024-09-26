@@ -18,7 +18,7 @@ data class FunctionCall(
     override fun evaluate(runtime: Runtime): String = runtime.callFunction(this)
     override fun dump(): String {
         val brackets = if (variadic) "{" to "}" else "(" to ")"
-        val strPrefix = if (prefix.isEmpty()) "" else "$prefix:"
+        val strPrefix = if (prefix.isEmpty()) "" else "$prefix."
         val builder = StringBuilder("$strPrefix$identifier${brackets.first}")
 
         arguments.forEach { arg ->
