@@ -36,7 +36,7 @@ enum class TokenType(val value: String? = null) {
     EXCLAMATION("!"),
 
     // Complex tokens
-    ASSIGN_RIGHT(":=");
+    ASSIGN_RIGHT(":=")
 }
 
 fun findMatchingType(str: String): TokenType? {

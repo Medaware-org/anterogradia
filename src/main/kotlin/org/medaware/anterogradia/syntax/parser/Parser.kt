@@ -31,6 +31,16 @@ class Parser(private val tokenizer: Tokenizer) {
         if (currentToken.type == TokenType.UNDEFINED)
             return StringLiteral("")
 
+        // Magnitude binding
+        if (currentToken.type == TokenType.VBAR) {
+            consume() // '|'
+            val expr = parseExpression()
+            if (currentToken.type != TokenType.VBAR)
+                throw ParseException("Expected '|' after magnitude expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+            consume() // '|'
+            return FunctionCall("", "len", hashMapOf("expr" to expr), false)
+        }
+
         val getBinding = (currentToken.type == TokenType.AMPERSAND)
 
         if (getBinding)
@@ -47,18 +57,12 @@ class Parser(private val tokenizer: Tokenizer) {
         return if (getBinding) FunctionCall("", "get", hashMapOf("key" to expr), false) else expr
     }
 
-    fun parseExpression(): Node {
-        val magnitude = currentToken.compareToken(TokenType.VBAR)
-
-        if (magnitude)
-            consume() // '|'
-
+    fun parseAdditiveExpression(): Node {
         var left = parseSimpleExpression()
 
-        // Comparison bindings
         if (currentToken.compareToken(TokenType.EQUALS)) {
             consume() // '='
-            return FunctionCall(
+            left = FunctionCall(
                 "",
                 "equal",
                 hashMapOf(Standard.CMP_LEFT to left, Standard.CMP_RIGHT to parseSimpleExpression()),
@@ -66,7 +70,7 @@ class Parser(private val tokenizer: Tokenizer) {
             )
         } else if (currentToken.compareToken(TokenType.LGREATER)) {
             consume() // '>'
-            return FunctionCall(
+            left = FunctionCall(
                 "",
                 "lgt",
                 hashMapOf(Standard.CMP_LEFT to left, Standard.CMP_RIGHT to parseSimpleExpression()),
@@ -74,7 +78,7 @@ class Parser(private val tokenizer: Tokenizer) {
             )
         } else if (currentToken.compareToken(TokenType.RGREATER)) {
             consume() // '<'
-            return FunctionCall(
+            left = FunctionCall(
                 "",
                 "rgt",
                 hashMapOf(Standard.CMP_LEFT to left, Standard.CMP_RIGHT to parseSimpleExpression()),
@@ -82,19 +86,16 @@ class Parser(private val tokenizer: Tokenizer) {
             )
         }
 
+        return left
+    }
+
+    fun parseExpression(): Node {
+        var left = parseAdditiveExpression()
+
         // Variable assignment
         if (currentToken.compareToken(TokenType.ASSIGN_RIGHT)) {
             consume() // ':='
             left = FunctionCall("", "set", hashMapOf("key" to left, "value" to parseSimpleExpression()), false)
-        }
-
-        if (magnitude) {
-            if (!currentToken.compareToken(TokenType.VBAR))
-                throw ParseException("Expected '|' after the magnitude expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
-
-            consume() // '|'
-
-            left = FunctionCall("", "len", hashMapOf("expr" to left), false)
         }
 
         return left
