@@ -85,4 +85,20 @@ class Strings(val runtime: Runtime) {
         return results.groups[groupNumber]!!.value
     }
 
+    @DiscreteFunction(identifier = "substr", params = ["str", "start", "end"])
+    fun substr(str: Node, start: Node, end: Node): String {
+        val startIndex = start.evaluate(runtime).antgNumber<Int>()
+        val endIndex = end.evaluate(runtime).antgNumber<Int>()
+        val strStr = str.evaluate(runtime)
+
+        if (startIndex !in 0 ..< strStr.length || endIndex !in 0 .. strStr.length ||
+            endIndex < startIndex)
+            throw AntgRuntimeException("Start and End index are invalid.")
+
+        return strStr.substring(startIndex, endIndex)
+    }
+
+    @DiscreteFunction(identifier = "substr", params = ["str", "start"])
+    fun substr(str: Node, start: Node): String = substr(str, start, StringLiteral(str.evaluate(runtime).length.toString()))
+
 }
