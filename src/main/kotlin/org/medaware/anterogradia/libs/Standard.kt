@@ -193,6 +193,9 @@ class Standard(val runtime: Runtime) {
     fun mod(left: Node, right: Node): String =
         (left.evaluate(runtime).antgNumber<Double>() % right.evaluate(runtime).antgNumber<Double>()).toString()
 
+    @DiscreteFunction(identifier = "sqrt", params = ["expr"])
+    fun sqrt(expr: Node): String = kotlin.math.sqrt(expr.evaluate(runtime).antgNumber<Double>()).toString()
+
     @DiscreteFunction(identifier = "vsignflp", params = ["id"])
     fun vsignflp(id: Node): String {
         val key = id.evaluate(runtime)
