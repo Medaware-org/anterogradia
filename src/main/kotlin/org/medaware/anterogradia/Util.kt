@@ -41,7 +41,7 @@ inline fun <reified T> String.antgNumber(): T {
 inline fun <reified T> String.antgNumberOrNull(): T? {
     return try {
         antgNumber<T>()
-    } catch (nfe: NumberFormatException) {
+    } catch (e: Exception) {
         null
     }
 }

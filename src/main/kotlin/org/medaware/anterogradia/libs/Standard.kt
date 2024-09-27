@@ -223,4 +223,33 @@ class Standard(val runtime: Runtime) {
         return variableStore[key]!!
     }
 
+    @DiscreteFunction(identifier = "while", params = ["cond", "expr"])
+    fun `while`(cond: Node, expr: Node): String {
+        var last = ""
+        while (cond.evaluate(runtime).lowercase() == TRUE.lowercase()) {
+            last = expr.evaluate(runtime)
+        }
+        return last
+    }
+
+    @DiscreteFunction(identifier = "not", params = ["cond"])
+    fun not(cond: Node): String {
+        if (cond.evaluate(runtime).lowercase() == TRUE.lowercase())
+            return FALSE
+        return TRUE
+    }
+
+    @DiscreteFunction(identifier = "_debug", params = ["str"])
+    fun _debug(str: Node): String {
+        Anterogradia.logger.info(str.evaluate(runtime))
+        return ""
+    }
+
+    @DiscreteFunction(identifier = "trunc", params = ["expr"])
+    fun trunc(expr: Node): String = expr.evaluate(runtime).antgNumberOrNull<Double>().let { it ->
+        if (it != null)
+            return@let it.toInt()
+        return ""
+    }.toString()
+
 }

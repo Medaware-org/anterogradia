@@ -1,1 +1,9 @@
-| 1 = | "B" | | = 4
+@library "org.medaware.anterogradia.libs.Strings" as str
+progn {
+    `str := "Hello, World!"
+    `i := |&`str|
+    while (cond = &`i > 0, expr = progn {
+        _debug(str = str.substr(str = &`str, start = &`i))
+        decrement(id = `i)
+    })
+}
