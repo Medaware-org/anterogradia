@@ -226,8 +226,8 @@ class Standard(val runtime: Runtime) {
         return variableStore[key]!!
     }
 
-    @DiscreteFunction(identifier = "while", params = ["cond", "expr"])
-    fun `while`(cond: Node, expr: Node): String {
+    @DiscreteFunction(identifier = "_while", params = ["cond", "expr"])
+    fun _while(cond: Node, expr: Node): String {
         var last = ""
         while (cond.evaluate(runtime).lowercase() == TRUE.lowercase()) {
             last = expr.evaluate(runtime)

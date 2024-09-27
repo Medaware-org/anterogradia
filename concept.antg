@@ -3,7 +3,7 @@
 `str := "Hello, World!"
 `i := |&`str|
 
-while (cond = &`i > 0, expr = progn {
+while (!(!(&`i > 0))) {
     _debug(str = str.substr(str = &`str, start = &`i))
     decrement(id = `i)
-})
+}
