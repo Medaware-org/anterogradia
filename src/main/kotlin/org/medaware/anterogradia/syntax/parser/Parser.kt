@@ -27,6 +27,17 @@ class Parser(private val tokenizer: Tokenizer) {
 
     fun hasNext(): Boolean = currentToken.orNull() != null && nextToken.orNull() != null
 
+    fun parserEntrypoint(): FunctionCall {
+        val expressions = mutableListOf<Node>()
+        while (currentToken.orNull() != null)
+            expressions.add(parseExpression())
+        val prognParams = hashMapOf<String, Node>()
+        expressions.forEachIndexed { index, it ->
+            prognParams.put(index.toString(), it)
+        }
+        return FunctionCall("", "progn", prognParams, true)
+    }
+
     private fun parseSimpleExpression(): Node {
         if (currentToken.type == TokenType.UNDEFINED)
             return StringLiteral("")
@@ -460,7 +471,7 @@ class Parser(private val tokenizer: Tokenizer) {
                 val lib = parser.parseLoadInstruction() ?: break
                 libs.add(lib)
             }
-            val expr = parser.parseExpression()
+            val expr = parser.parserEntrypoint()
             return Script(libs, expr)
         }
     }
