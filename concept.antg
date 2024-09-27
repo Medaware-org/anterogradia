@@ -1,1 +1,4 @@
-|"ABC"| > 0
+@library "org.medaware.anterogradia.libs.Strings" as str
+str.capture(str = "Lorem 123",
+            regex = "[a-zA-Z ]+([0-9]+)",
+            group = 1)

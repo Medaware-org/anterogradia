@@ -1,12 +1,14 @@
 package org.medaware.anterogradia.libs
 
 import org.medaware.anterogradia.antgNumber
+import org.medaware.anterogradia.exception.AntgRuntimeException
 import org.medaware.anterogradia.map
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.DiscreteFunction
 import org.medaware.anterogradia.runtime.library.StateRetention.STATEFUL
 import org.medaware.anterogradia.syntax.Node
+import org.medaware.anterogradia.syntax.StringLiteral
 import kotlin.String
 
 @AnterogradiaLibrary(STATEFUL)
@@ -28,15 +30,15 @@ class Strings(val runtime: Runtime) {
         return strStr[ix].toString()
     }
 
-    @DiscreteFunction(identifier = "at", params = ["str", "index", "new"])
-    fun at(str: Node, index: Node, new: Node): String {
+    @DiscreteFunction(identifier = "at", params = ["str", "index", "insert"])
+    fun at(str: Node, index: Node, insert: Node): String {
         val ix = index.evaluate(runtime).antgNumber<Int>()
         val strStr = str.evaluate(runtime)
 
         if (ix < 0 || ix >= strStr.length)
             return ""
 
-        val substr = new.evaluate(runtime)
+        val substr = insert.evaluate(runtime)
 
         if (substr.isEmpty())
             return strStr
@@ -49,5 +51,38 @@ class Strings(val runtime: Runtime) {
 
     @DiscreteFunction(identifier = "lower", params = ["str"])
     fun lower(str: Node): String = str.evaluate(runtime).lowercase()
+
+    @DiscreteFunction(identifier = "matches", params = ["str", "regex"])
+    fun matches(str: Node, regex: Node) =
+        str.evaluate(runtime).matches(regex.evaluate(runtime).toRegex()).map(Standard.TRUE, Standard.FALSE)
+
+    @DiscreteFunction(identifier = "replace", params = ["org", "regex", "str", "mode"])
+    fun replace(org: Node, regex: Node, str: Node, mode: Node): String {
+        val modeStr = mode.evaluate(runtime)
+        val orgStr = org.evaluate(runtime)
+        val regexRegex = regex.evaluate(runtime).toRegex()
+        val strStr = str.evaluate(runtime)
+        return if (modeStr == "all")
+            orgStr.replace(regexRegex, strStr)
+        else if (modeStr == "first")
+            orgStr.replaceFirst(regexRegex, strStr)
+        else throw AntgRuntimeException("Replacement mode must either be 'all' or 'first', got '${modeStr}'.")
+    }
+
+    @DiscreteFunction(identifier = "replace", params = ["org", "regex", "str"])
+    fun replace(org: Node, regex: Node, str: Node) =
+        replace(org, regex, str, StringLiteral("all"))
+
+    @DiscreteFunction(identifier = "trim", params = ["str"])
+    fun trim(str: Node) = str.evaluate(runtime).trim()
+
+    @DiscreteFunction(identifier = "capture", params = ["str", "regex", "group"])
+    fun capture(str: Node, regex: Node, group: Node): String {
+        val results = regex.evaluate(runtime).toRegex().matchEntire(str.evaluate(runtime)) ?: return ""
+        val groupNumber = group.evaluate(runtime).antgNumber<Int>()
+        if (groupNumber < 0 || groupNumber >= results.groups.size)
+            return ""
+        return results.groups[groupNumber]!!.value
+    }
 
 }
