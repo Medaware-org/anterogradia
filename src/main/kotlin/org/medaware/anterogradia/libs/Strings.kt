@@ -91,7 +91,7 @@ class Strings(val runtime: Runtime) {
         val endIndex = end.evaluate(runtime).antgNumber<Int>()
         val strStr = str.evaluate(runtime)
 
-        if (startIndex !in 0 ..< strStr.length || endIndex !in 0 .. strStr.length ||
+        if (startIndex !in 0 .. strStr.length || endIndex !in 0 .. strStr.length ||
             endIndex < startIndex)
             throw AntgRuntimeException("Start and End index are invalid.")
 
