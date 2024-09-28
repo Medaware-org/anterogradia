@@ -42,6 +42,15 @@ class Parser(private val tokenizer: Tokenizer) {
         if (currentToken.type == TokenType.UNDEFINED)
             return StringLiteral("")
 
+        if (currentToken.compareToken(TokenType.LPAREN)) {
+            consume() // '('
+            val expr = parseExpression()
+            if (!currentToken.compareToken(TokenType.RPAREN))
+                throw ParseException("Expected ')' after sub-expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+            consume() // ')'
+            return expr
+        }
+
         // Magnitude binding
         if (currentToken.type == TokenType.VBAR) {
             consume() // '|'
@@ -101,6 +110,11 @@ class Parser(private val tokenizer: Tokenizer) {
     }
 
     fun parseExpression(): Node {
+        val negated = currentToken.compareToken(TokenType.EXCLAMATION)
+
+        if (negated)
+            consume() // '!'
+
         var left = parseAdditiveExpression()
 
         // Variable assignment
@@ -108,6 +122,9 @@ class Parser(private val tokenizer: Tokenizer) {
             consume() // ':='
             left = FunctionCall("", "set", hashMapOf("key" to left, "value" to parseSimpleExpression()), false)
         }
+
+        if (negated)
+            left = FunctionCall("", "not", hashMapOf("cond" to left), false)
 
         return left
     }
@@ -147,6 +164,9 @@ class Parser(private val tokenizer: Tokenizer) {
 
         if (currentToken.compareToken("eval"))
             return parseFunctionEval()
+
+        if (currentToken.compareToken("while"))
+            return parseWhileLoop()
 
         var result: Node? = null
 
@@ -245,6 +265,29 @@ class Parser(private val tokenizer: Tokenizer) {
         consume() // Identifier
 
         return FunctionCall("", "_eval", hashMapOf("id" to StringLiteral(functionId)), false)
+    }
+
+    fun parseWhileLoop(): FunctionCall {
+        if (!currentToken.compareToken("while"))
+            throw ParseException("Expected identifier 'while' at the start of a while expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume()
+
+        if (!currentToken.compareToken(TokenType.LPAREN))
+            throw ParseException("Expected '(' after 'while' identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume()
+
+        val expr = parseExpression()
+
+        if (!currentToken.compareToken(TokenType.RPAREN))
+            throw ParseException("Expected ')' after while condition, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume()
+
+        val blk = parseBlock()
+
+        return FunctionCall("", "_while", hashMapOf("cond" to expr, "expr" to blk))
     }
 
     fun parseFunctionDefinition(): FunctionCall {
