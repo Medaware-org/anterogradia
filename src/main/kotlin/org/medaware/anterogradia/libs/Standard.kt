@@ -14,6 +14,9 @@ import org.medaware.anterogradia.runtime.library.DiscreteFunction
 import org.medaware.anterogradia.runtime.library.StateRetention.STATEFUL
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
+import java.nio.file.Files
+import java.nio.file.Paths
+import kotlin.io.path.Path
 import kotlin.math.pow
 
 @AnterogradiaLibrary(STATEFUL)
@@ -40,6 +43,12 @@ class Standard(val runtime: Runtime) {
         var last: String = ""
         params.forEach { last = it.evaluate(runtime) }
         return last
+    }
+
+    @VariadicFunction(identifier = "omit")
+    fun omit(params: Array<Node>): String {
+        params.forEach { it.evaluate(runtime) }
+        return ""
     }
 
     @DiscreteFunction(identifier = "nothing")

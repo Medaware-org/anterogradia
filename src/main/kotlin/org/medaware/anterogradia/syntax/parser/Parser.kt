@@ -39,6 +39,11 @@ class Parser(private val tokenizer: Tokenizer) {
     }
 
     private fun parseSimpleExpression(): Node {
+        val getBinding = (currentToken.type == TokenType.AMPERSAND)
+
+        if (getBinding)
+            consume() // '&'
+
         if (currentToken.type == TokenType.UNDEFINED)
             return StringLiteral("")
 
@@ -61,16 +66,10 @@ class Parser(private val tokenizer: Tokenizer) {
             return FunctionCall("", "len", hashMapOf("expr" to expr), false)
         }
 
-        val getBinding = (currentToken.type == TokenType.AMPERSAND)
-
-        if (getBinding)
-            consume() // '&'
-
         val expr = parseBindings() ?: when (currentToken.type) {
             TokenType.IDENTIFIER -> parseFunctionCall()
             TokenType.STRING_LITERAL,
             TokenType.NUMBER_LITERAL -> parseStringLiteral()
-
             else -> throw ParseException("Could not parse expression: Unknown expression starting with token of type ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
         }
 

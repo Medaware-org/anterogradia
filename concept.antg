@@ -1,12 +1,37 @@
+@library "org.medaware.anterogradia.libs.ASCII" as ascii
 
 fun variableName <x, y> {
     sequence { "px" &`x " : " &`y }
 }
 
 fun getAt <x, y> {
-    & eval variableName(x = &`x, y = &`y)
+    &(eval variableName(x = &`x, y = &`y))
 }
 
 fun setAt <x, y, value> {
-    eval variableName(x = &`x, y = &`y) := &`value
+    (eval variableName(x = &`x, y = &`y)) := &`value
 }
+
+fun generatePpmString <width, height> {
+    `x := 0
+    `y := 0
+    `str := sequence {
+        "P3"
+        ascii.endl()
+        &`width " " &`height
+        ascii.endl()
+        "255"
+        ascii.endl()
+    }
+    repeat (count = &`width, str = progn {
+        repeat (count = &`height, str = progn {
+            `grayscale := trunc(expr = mul(left = div(left = 255.0, right = &`width), right = &`x))
+            eval setAt(x = &`x, y = &`y, value = &`grayscale)
+            `str := sequence { &`str &`grayscale " " &`grayscale " " &`grayscale ascii.endl() }
+            increment (id = `y)
+        })
+        increment (id = `x)
+    })
+}
+
+eval generatePpmString(width = 200, height = 200)
