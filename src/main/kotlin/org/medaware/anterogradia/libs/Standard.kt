@@ -14,6 +14,7 @@ import org.medaware.anterogradia.runtime.library.DiscreteFunction
 import org.medaware.anterogradia.runtime.library.StateRetention.STATEFUL
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
+import kotlin.math.pow
 
 @AnterogradiaLibrary(STATEFUL)
 class Standard(val runtime: Runtime) {
@@ -195,6 +196,10 @@ class Standard(val runtime: Runtime) {
 
     @DiscreteFunction(identifier = "sqrt", params = ["expr"])
     fun sqrt(expr: Node): String = kotlin.math.sqrt(expr.evaluate(runtime).antgNumber<Double>()).toString()
+
+    @DiscreteFunction(identifier = "pow", params = ["expr", "pow"])
+    fun pow(expr: Node, pow: Node) =
+        expr.evaluate(runtime).antgNumber<Double>().pow(pow.evaluate(runtime).antgNumber<Double>()).toString()
 
     @DiscreteFunction(identifier = "vsignflp", params = ["id"])
     fun vsignflp(id: Node): String {

@@ -1,9 +1,12 @@
-@library "org.medaware.anterogradia.libs.Strings" as str
 
-`str := "Hello, World!"
-`i := |&`str|
+fun variableName <x, y> {
+    sequence { "px" &`x " : " &`y }
+}
 
-while (!(!(&`i > 0))) {
-    _debug(str = str.substr(str = &`str, start = &`i))
-    decrement(id = `i)
+fun getAt <x, y> {
+    & eval variableName(x = &`x, y = &`y)
+}
+
+fun setAt <x, y, value> {
+    eval variableName(x = &`x, y = &`y) := &`value
 }
