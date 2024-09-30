@@ -1,11 +1,11 @@
 package org.medaware.anterogradia
 
-import org.medaware.anterogradia.exception.AntgRuntimeException
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.syntax.parser.Parser
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.logging.ConsoleHandler
+import java.util.logging.Level
 import java.util.logging.LogRecord
 import java.util.logging.Logger
 import java.util.logging.SimpleFormatter
@@ -22,6 +22,18 @@ data class AnterogradiaResult(
 
 object Anterogradia {
     val logger = Logger.getLogger("Anterogradia")
+
+    private var _enableLogging = true
+
+    var enableLogging: Boolean
+        get() = _enableLogging
+        set(v) {
+            _enableLogging = v
+            if (!v)
+                logger.level = Level.OFF
+            else
+                logger.level = Level.ALL
+        }
 
     init {
         val handler = ConsoleHandler()
