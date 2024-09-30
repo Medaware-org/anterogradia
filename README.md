@@ -27,7 +27,7 @@ progn {
 }
 ```
 
-## :warning: Deprecation Notice :warning:
+## :warning: Documentation Deprecation Notice :warning:
 As of the 26th of September 2024 the Anterogradia documentation was moved to [the TeX edition](https://github.com/Medaware-org/antg-docs)
 
 ## Kotlin API
