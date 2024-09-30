@@ -241,6 +241,7 @@ class Parser(private val tokenizer: Tokenizer) {
         if (nextToken.type == TokenType.LPAREN) {
             val line = currentToken.line
             val call = parseFunctionCall()
+
             if (call.variadic)
                 throw ParseException("A function called via 'eval' must not be variadic. Error on line $line.")
 
