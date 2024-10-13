@@ -21,16 +21,19 @@ data class FunctionCall(
         val strPrefix = if (prefix.isEmpty()) "" else "$prefix."
         val builder = StringBuilder("$strPrefix$identifier${brackets.first}")
 
-        arguments.forEach { arg ->
-            if (!variadic)
+        if (!variadic) {
+            arguments.forEach { arg ->
                 builder.append("${arg.key}=${arg.value.dump()},")
-            else
-                builder.append("${arg.value.dump()},")
+            }
+        } else {
+            arguments.map { it.key.toInt() }.sorted().forEach {
+                builder.append("${arguments[it.toString()]!!.dump()},")
+            }
         }
 
         if (arguments.isNotEmpty())
             builder.deleteCharAt(builder.length - 1) // Remove trailing ','
-        
+
         builder.append(brackets.second)
 
         return builder.toString()

@@ -1,5 +1,6 @@
 package org.medaware.anterogradia.runtime.library
 
+import com.google.gson.GsonBuilder
 import org.medaware.anterogradia.Anterogradia
 import org.medaware.anterogradia.exception.FunctionCallException
 import org.medaware.anterogradia.exception.LibraryException
@@ -148,7 +149,9 @@ class LibraryManager {
 
             val paramsList = mutableListOf<Node>()
 
-            args.keys.map { it.toInt() }.sorted().forEach {
+            val sortedKeys = args.keys.map { it.toInt() }.sorted()
+
+            sortedKeys.forEach {
                 paramsList.add(args[it.toString()]!!)
             }
 
