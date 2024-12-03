@@ -1,0 +1,12 @@
+@library "org.medaware.anterogradia.libs.LinearAlgebra" as la
+
+progn {
+    `origin := la.v { 0 0 }
+    `direction := la.v { 1 0 }
+    `length := 10.5
+    `point := la.sum {
+        &`origin
+        la.mul(v = &`direction, fac = &`length)
+    }
+    &`point
+}
