@@ -2,6 +2,7 @@ package org.medaware.anterogradia
 
 import org.medaware.anterogradia.exception.AntgRuntimeException
 import org.medaware.anterogradia.runtime.Runtime
+import org.medaware.anterogradia.syntax.FunctionCall
 import org.medaware.anterogradia.syntax.Node
 
 fun String.padIfNotEmpty(): String {
@@ -53,3 +54,14 @@ fun Throwable.rootCause(): Throwable {
     }
     return cause
 }
+
+fun randomString(): String {
+    val chars = ('A'..'Z') + ('a'..'z')
+    return CharArray(128) { chars.random() }.concatToString()
+}
+
+fun Array<out Node>.progn(): FunctionCall = FunctionCall(
+    "", "progn", hashMapOf(*mapIndexed { index, node ->
+        index.toString() to node
+    }.toTypedArray()), variadic = true
+)

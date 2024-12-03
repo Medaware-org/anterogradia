@@ -1,0 +1,5 @@
+fun init <a, b> {
+    sequence { &`a ", " &`b}
+}
+
+eval init(a = "Hello", b = "World")

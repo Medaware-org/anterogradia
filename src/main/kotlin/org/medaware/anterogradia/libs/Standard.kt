@@ -1,22 +1,14 @@
 package org.medaware.anterogradia.libs
 
-import org.medaware.anterogradia.Anterogradia
-import org.medaware.anterogradia.antgNumber
-import org.medaware.anterogradia.antgNumberOrNull
+import org.medaware.anterogradia.*
 import org.medaware.anterogradia.exception.AntgRuntimeException
-import org.medaware.anterogradia.hasNonNullEntry
-import org.medaware.anterogradia.hasNullEntry
-import org.medaware.anterogradia.map
-import org.medaware.anterogradia.rootCause
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.DiscreteFunction
 import org.medaware.anterogradia.runtime.library.StateRetention.STATEFUL
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
-import java.nio.file.Files
-import java.nio.file.Paths
-import kotlin.io.path.Path
+import org.medaware.anterogradia.syntax.StringLiteral
 import kotlin.math.pow
 
 @AnterogradiaLibrary(STATEFUL)
@@ -31,6 +23,8 @@ class Standard(val runtime: Runtime) {
 
     private val variableStore = hashMapOf<String, String>()
     private val functionStore = hashMapOf<String, Node>()
+
+    private val validatorValueId = randomString()
 
     @DiscreteFunction(identifier = "about")
     fun about(): String = "Anterogradia Standard Library\n{C} Medaware, 2024\n"
@@ -166,6 +160,14 @@ class Standard(val runtime: Runtime) {
         return stored.evaluate(runtime)
     }
 
+    @DiscreteFunction(identifier = "callw", params = ["before", "expr", "after"])
+    fun callw(before: Node, expr: Node, after: Node): String {
+        before.evaluate(runtime)
+        val value = expr.evaluate(runtime)
+        after.evaluate(runtime)
+        return value
+    }
+
     @DiscreteFunction(identifier = "__require_prop", params = ["id", "err"])
     fun __require_prop(id: Node, err: Node): String {
         if (variableStore.containsKey(id.evaluate(runtime)))
@@ -268,5 +270,35 @@ class Standard(val runtime: Runtime) {
             return@let it.toInt()
         return ""
     }.toString()
+
+    @DiscreteFunction(identifier = "__validate", params = ["type", "value"])
+    fun __validate(type: Node, value: Node): String {
+        val typeStr = type.evaluate(runtime)
+        val valueStr = value.evaluate(runtime)
+        if (runtime.typeValidate(typeStr, valueStr))
+            return "true"
+        throw AntgRuntimeException("The value \"$valueStr\" does not conform to the norms of type \"$typeStr\".")
+    }
+
+    @DiscreteFunction(identifier = "__validator_value")
+    fun __validator_value(): String {
+        return get(StringLiteral(validatorValueId))
+    }
+
+    @DiscreteFunction(identifier = "__register_validator", params = ["type", "validator"])
+    fun __register_validator(type: Node, validator: Node): String {
+        val typeStr = type.evaluate(runtime)
+        val validatorStr = validator.evaluate(runtime)
+        if (functionStore[validatorStr] == null)
+            throw AntgRuntimeException("The requested validator function '$validatorStr' does not exist.")
+        runtime.registerValidator(typeStr) { input ->
+            val previousValue = get(StringLiteral(validatorValueId))
+            set(StringLiteral(validatorValueId), StringLiteral(input))
+            val status = _eval(validator) == "true"
+            set(StringLiteral(validatorValueId), StringLiteral(previousValue))
+            status
+        }
+        return "true"
+    }
 
 }
