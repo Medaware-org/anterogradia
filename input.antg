@@ -1,12 +1,17 @@
 @library "org.medaware.anterogradia.libs.LinearAlgebra" as la
 
-progn {
-    `origin := la.v { 0 0 }
-    `direction := la.v { 1 0 }
-    `length := 10.5
-    `point := la.sum {
+validator vector {
+    la.validate(str = &"%value")
+}
+
+fun point_at <origin: vector, direction: vector, distance: real> {
+    la.sum {
         &`origin
         la.mul(v = &`direction, fac = &`length)
     }
-    &`point
 }
+
+`origin := la.v { 0 0 }
+`direction := la.v { 1 0 }
+`length := 10.5
+eval point_at(origin = &`origin, direction = &`direction, distance = &`length)

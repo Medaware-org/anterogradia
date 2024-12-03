@@ -70,6 +70,7 @@ class Parser(private val tokenizer: Tokenizer) {
             TokenType.IDENTIFIER -> parseFunctionCall()
             TokenType.STRING_LITERAL,
             TokenType.NUMBER_LITERAL -> parseStringLiteral()
+
             else -> throw ParseException("Could not parse expression: Unknown expression starting with token of type ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
         }
 
@@ -160,6 +161,9 @@ class Parser(private val tokenizer: Tokenizer) {
 
         if (currentToken.compareToken("fun"))
             return parseFunctionDefinition()
+
+        if (currentToken.compareToken("validator"))
+            return parseValidatorDefinition()
 
         if (currentToken.compareToken("eval"))
             return parseFunctionEval()
@@ -290,6 +294,50 @@ class Parser(private val tokenizer: Tokenizer) {
         return FunctionCall("", "_while", hashMapOf("cond" to expr, "expr" to blk))
     }
 
+    fun parseValidatorDefinition(): FunctionCall {
+        if (!currentToken.compareToken("validator"))
+            throw ParseException("Expected identifier 'validator' at the start of a validator definition, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        consume()
+
+        if (!currentToken.compareToken(TokenType.IDENTIFIER))
+            throw ParseException("Expected type identifier after 'validator', got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        val typeId = currentToken.value
+
+        consume()
+
+        if (!currentToken.compareToken(TokenType.LCURLY))
+            throw ParseException("Expected '{' after type identifier of validator, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+        val block = parseBlock()
+
+        val chars = ('A'..'Z') + ('a'..'z')
+
+        val obfuscated = CharArray(128) { chars.random() }.concatToString()
+
+        val def = FunctionCall(
+            "", "_fun", hashMapOf(
+                "id" to StringLiteral(obfuscated),
+                "expr" to block
+            ), variadic = false
+        )
+
+        val reg = FunctionCall(
+            "", "__register_validator", hashMapOf(
+                "type" to StringLiteral(typeId),
+                "validator" to StringLiteral(obfuscated)
+            )
+        )
+
+        return FunctionCall(
+            "", "progn", hashMapOf(
+                "1" to def,
+                "2" to reg
+            ), variadic = true
+        )
+    }
+
     fun parseFunctionDefinition(): FunctionCall {
         if (!currentToken.compareToken("fun"))
             throw ParseException("Expected identifier 'fun' at the start of a function definition, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
@@ -303,7 +351,7 @@ class Parser(private val tokenizer: Tokenizer) {
 
         consume() // Function id
 
-        var requiredParams = mutableListOf<String>()
+        var requiredParams = mutableListOf<Pair<String, String>>()
 
         // Required parameters list (optional)
         if (currentToken.compareToken(TokenType.RGREATER)) {
@@ -313,9 +361,23 @@ class Parser(private val tokenizer: Tokenizer) {
                 if (!currentToken.compareToken(TokenType.IDENTIFIER))
                     throw ParseException("Expected required property identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
-                requiredParams.add(currentToken.value)
+                var identifier = currentToken.value
+                var type = "any"
 
                 consume() // Identifier
+
+                // Optional type annotation
+                if (currentToken.compareToken(TokenType.COLON)) {
+                    consume()
+
+                    if (!currentToken.compareToken(TokenType.IDENTIFIER))
+                        throw ParseException("Expected type identifier, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
+
+                    type = currentToken.value
+                    consume()
+                }
+
+                requiredParams.add(identifier to type)
 
                 if (currentToken.compareToken(TokenType.COMMA)) {
                     consume()
@@ -341,12 +403,29 @@ class Parser(private val tokenizer: Tokenizer) {
                 wrapperParams.put(
                     index.toString(),
                     FunctionCall(
-                        "",
-                        "__require_prop",
-                        hashMapOf(
-                            "id" to StringLiteral(it),
-                            "err" to StringLiteral("The property '$it' required for function '$functionId' was not present at the time of evaluation.")
-                        )
+                        "", "sequence", hashMapOf(
+                            "1" to FunctionCall(
+                                "",
+                                "__require_prop",
+                                hashMapOf(
+                                    "id" to StringLiteral(it.first),
+                                    "err" to StringLiteral("The property '${it.first}' required for function '$functionId' was not present at the time of evaluation.")
+                                )
+                            ),
+                            "2" to FunctionCall(
+                                "", "__validate", hashMapOf(
+                                    "type" to StringLiteral(it.second),
+                                    "value" to FunctionCall(
+                                        "",
+                                        "get",
+                                        hashMapOf(
+                                            "key" to StringLiteral(it.first)
+                                        ),
+                                        false
+                                    )
+                                ), false
+                            )
+                        ), variadic = true
                     )
                 )
             }

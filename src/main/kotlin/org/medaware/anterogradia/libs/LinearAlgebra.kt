@@ -17,6 +17,16 @@ class LinearAlgebra(val runtime: Runtime) {
     @DiscreteFunction("about")
     fun about(): String = "Standard Linear Algebra Library\n{C} Medaware, 2024\n"
 
+    @DiscreteFunction("validate", params = ["str"])
+    fun validate(str: Node): String {
+        try {
+            Vector.parse(str.evaluate(runtime))
+        } catch (e: Exception) {
+            return "false"
+        }
+        return "true"
+    }
+
     @VariadicFunction("v")
     fun v(coords: Array<Node>): String {
         if (coords.isEmpty())

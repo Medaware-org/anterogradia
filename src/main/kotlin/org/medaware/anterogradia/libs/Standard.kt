@@ -1,22 +1,14 @@
 package org.medaware.anterogradia.libs
 
-import org.medaware.anterogradia.Anterogradia
-import org.medaware.anterogradia.antgNumber
-import org.medaware.anterogradia.antgNumberOrNull
+import org.medaware.anterogradia.*
 import org.medaware.anterogradia.exception.AntgRuntimeException
-import org.medaware.anterogradia.hasNonNullEntry
-import org.medaware.anterogradia.hasNullEntry
-import org.medaware.anterogradia.map
-import org.medaware.anterogradia.rootCause
 import org.medaware.anterogradia.runtime.Runtime
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.DiscreteFunction
 import org.medaware.anterogradia.runtime.library.StateRetention.STATEFUL
 import org.medaware.anterogradia.runtime.library.VariadicFunction
 import org.medaware.anterogradia.syntax.Node
-import java.nio.file.Files
-import java.nio.file.Paths
-import kotlin.io.path.Path
+import org.medaware.anterogradia.syntax.StringLiteral
 import kotlin.math.pow
 
 @AnterogradiaLibrary(STATEFUL)
@@ -268,5 +260,30 @@ class Standard(val runtime: Runtime) {
             return@let it.toInt()
         return ""
     }.toString()
+
+    @DiscreteFunction(identifier = "__validate", params = ["type", "value"])
+    fun __validate(type: Node, value: Node): String {
+        val typeStr = type.evaluate(runtime)
+        val valueStr = value.evaluate(runtime)
+        if (runtime.typeValidate(typeStr, valueStr))
+            return "true"
+        throw AntgRuntimeException("The value \"$valueStr\" does not conform to the norms of type \"$typeStr\".")
+    }
+
+    @DiscreteFunction(identifier = "__register_validator", params = ["type", "validator"])
+    fun __register_validator(type: Node, validator: Node): String {
+        val typeStr = type.evaluate(runtime)
+        val validatorStr = validator.evaluate(runtime)
+        if (functionStore[validatorStr] == null)
+            throw AntgRuntimeException("The requested validator function '$validatorStr' does not exist.")
+        runtime.registerValidator(typeStr) { input ->
+            val previousValue = get(StringLiteral("%value"))
+            set(StringLiteral("%value"), StringLiteral(input))
+            val status = _eval(validator) == "true"
+            set(StringLiteral("%value"), StringLiteral(previousValue))
+            status
+        }
+        return "true"
+    }
 
 }

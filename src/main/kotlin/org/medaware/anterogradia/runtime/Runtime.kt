@@ -5,6 +5,8 @@ import org.medaware.anterogradia.libs.Standard
 import org.medaware.anterogradia.runtime.library.AnterogradiaLibrary
 import org.medaware.anterogradia.runtime.library.LibraryManager
 import org.medaware.anterogradia.runtime.library.StateRetention
+import org.medaware.anterogradia.runtime.type.TypeValidator
+import org.medaware.anterogradia.runtime.type.ValidatorFunction
 import org.medaware.anterogradia.syntax.FunctionCall
 
 class Runtime(val parameters: HashMap<String, String> = hashMapOf()) {
@@ -12,6 +14,8 @@ class Runtime(val parameters: HashMap<String, String> = hashMapOf()) {
     private val libManager = LibraryManager()
 
     private val libInstances = hashMapOf<Class<*>, Any>()
+
+    private val validator = TypeValidator()
 
     init {
         libManager.register(Standard::class.java, "")
@@ -47,5 +51,9 @@ class Runtime(val parameters: HashMap<String, String> = hashMapOf()) {
 
         return libInstances[libClass]!!
     }
+
+    fun typeValidate(type: String, value: String) = validator.validate(type, value)
+
+    fun registerValidator(type: String, function: ValidatorFunction) = validator.register(type, function)
 
 }
