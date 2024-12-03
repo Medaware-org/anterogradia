@@ -2,6 +2,7 @@ package org.medaware.anterogradia.syntax.parser
 
 import org.medaware.anterogradia.exception.ParseException
 import org.medaware.anterogradia.libs.Standard
+import org.medaware.anterogradia.randomString
 import org.medaware.anterogradia.syntax.FunctionCall
 import org.medaware.anterogradia.syntax.Node
 import org.medaware.anterogradia.syntax.Script
@@ -312,9 +313,7 @@ class Parser(private val tokenizer: Tokenizer) {
 
         val block = parseBlock()
 
-        val chars = ('A'..'Z') + ('a'..'z')
-
-        val obfuscated = CharArray(128) { chars.random() }.concatToString()
+        val obfuscated = randomString()
 
         val def = FunctionCall(
             "", "_fun", hashMapOf(

@@ -13,6 +13,8 @@ class Vector(val dimensions: Array<Double>) {
 
     companion object {
         fun parse(str: String): Vector {
+            if (str.isEmpty())
+                throw AntgRuntimeException("The vector string is empty")
             val components = str.split("|").map { it -> it.antgNumber<Double>() }
             return Vector(components.toTypedArray())
         }
@@ -68,6 +70,38 @@ class Vector(val dimensions: Array<Double>) {
             dimensions[i] /= d;
 
         return this
+    }
+
+    fun normalize(): Vector {
+        return div(magnitude())
+    }
+
+    fun x(): Double {
+        if (dimensions.isEmpty())
+            throw AntgRuntimeException("Unable to extract X dimension from a vector of length ${dimensions.size}.")
+
+        return dimensions[0]
+    }
+
+    fun y(): Double {
+        if (dimensions.size < 2)
+            throw AntgRuntimeException("Unable to extract Y dimension from a vector of length ${dimensions.size}.")
+
+        return dimensions[1]
+    }
+
+    fun z(): Double {
+        if (dimensions.size < 3)
+            throw AntgRuntimeException("Unable to extract Z dimension from a vector of length ${dimensions.size}.")
+
+        return dimensions[2]
+    }
+
+    fun n(n: Int): Double {
+        if (dimensions.size <= n)
+            throw AntgRuntimeException("Unable to extract dimension $n from a vector of length ${dimensions.size}.")
+
+        return dimensions[n]
     }
 
     fun string(): String = dimensions.joinToString("|")

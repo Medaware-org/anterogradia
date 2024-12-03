@@ -53,3 +53,8 @@ fun Throwable.rootCause(): Throwable {
     }
     return cause
 }
+
+fun randomString(): String {
+    val chars = ('A'..'Z') + ('a'..'z')
+    return CharArray(128) { chars.random() }.concatToString()
+}

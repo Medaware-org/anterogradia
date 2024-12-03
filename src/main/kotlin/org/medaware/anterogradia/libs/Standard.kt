@@ -24,6 +24,8 @@ class Standard(val runtime: Runtime) {
     private val variableStore = hashMapOf<String, String>()
     private val functionStore = hashMapOf<String, Node>()
 
+    private val validatorValueId = randomString()
+
     @DiscreteFunction(identifier = "about")
     fun about(): String = "Anterogradia Standard Library\n{C} Medaware, 2024\n"
 
@@ -270,6 +272,11 @@ class Standard(val runtime: Runtime) {
         throw AntgRuntimeException("The value \"$valueStr\" does not conform to the norms of type \"$typeStr\".")
     }
 
+    @DiscreteFunction(identifier = "__validator_value")
+    fun __validator_value(): String {
+        return get(StringLiteral(validatorValueId))
+    }
+
     @DiscreteFunction(identifier = "__register_validator", params = ["type", "validator"])
     fun __register_validator(type: Node, validator: Node): String {
         val typeStr = type.evaluate(runtime)
@@ -277,10 +284,10 @@ class Standard(val runtime: Runtime) {
         if (functionStore[validatorStr] == null)
             throw AntgRuntimeException("The requested validator function '$validatorStr' does not exist.")
         runtime.registerValidator(typeStr) { input ->
-            val previousValue = get(StringLiteral("%value"))
-            set(StringLiteral("%value"), StringLiteral(input))
+            val previousValue = get(StringLiteral(validatorValueId))
+            set(StringLiteral(validatorValueId), StringLiteral(input))
             val status = _eval(validator) == "true"
-            set(StringLiteral("%value"), StringLiteral(previousValue))
+            set(StringLiteral(validatorValueId), StringLiteral(previousValue))
             status
         }
         return "true"
