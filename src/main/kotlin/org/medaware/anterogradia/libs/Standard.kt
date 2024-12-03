@@ -160,6 +160,14 @@ class Standard(val runtime: Runtime) {
         return stored.evaluate(runtime)
     }
 
+    @DiscreteFunction(identifier = "callw", params = ["before", "expr", "after"])
+    fun callw(before: Node, expr: Node, after: Node): String {
+        before.evaluate(runtime)
+        val value = expr.evaluate(runtime)
+        after.evaluate(runtime)
+        return value
+    }
+
     @DiscreteFunction(identifier = "__require_prop", params = ["id", "err"])
     fun __require_prop(id: Node, err: Node): String {
         if (variableStore.containsKey(id.evaluate(runtime)))

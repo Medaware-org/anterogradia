@@ -2,6 +2,7 @@ package org.medaware.anterogradia.syntax.parser
 
 import org.medaware.anterogradia.exception.ParseException
 import org.medaware.anterogradia.libs.Standard
+import org.medaware.anterogradia.progn
 import org.medaware.anterogradia.randomString
 import org.medaware.anterogradia.syntax.FunctionCall
 import org.medaware.anterogradia.syntax.Node
@@ -250,19 +251,61 @@ class Parser(private val tokenizer: Tokenizer) {
             if (call.variadic)
                 throw ParseException("A function called via 'eval' must not be variadic. Error on line $line.")
 
-            val prep = call.arguments.keys.map { arg ->
-                FunctionCall("", "set", hashMapOf("key" to StringLiteral(arg), "value" to call.arguments[arg]!!))
-            }.toMutableList()
+            // Preserve the previous values of the variables used for this function call
+            val preservations = hashMapOf<String, String>()
 
-            prep.add(FunctionCall("", "_eval", hashMapOf("id" to StringLiteral(call.identifier)), false))
+            val prep = call.arguments.keys.flatMap { arg ->
+                listOf(
+                    FunctionCall(
+                        "",
+                        "set",
+                        hashMapOf(
+                            "key" to StringLiteral(arg.let { id ->
+                                var obfuscated = randomString()
+                                preservations[id] = obfuscated
+                                return@let obfuscated
+                            }),
+                            "value" to FunctionCall(
+                                "", "get", hashMapOf(
+                                    "key" to StringLiteral(arg),
+                                )
+                            )
+                        )
+                    ),
+                    FunctionCall(
+                        "",
+                        "set",
+                        hashMapOf("key" to StringLiteral(arg), "value" to call.arguments[arg]!!)
+                    ),
+                )
+            }.toTypedArray().progn()
 
-            val map = hashMapOf<String, Node>()
+            val expr = FunctionCall("", "_eval", hashMapOf("id" to StringLiteral(call.identifier)), false)
 
-            prep.forEachIndexed { index, it ->
-                map.put(index.toString(), it)
-            }
+            val restore = call.arguments.keys.map { arg ->
+                FunctionCall(
+                    "",
+                    "set",
+                    hashMapOf(
+                        "key" to StringLiteral(arg),
+                        "value" to FunctionCall(
+                            "",
+                            "get",
+                            hashMapOf(
+                                "key" to StringLiteral(preservations[arg]!!)
+                            )
+                        )
+                    )
+                )
+            }.toTypedArray().progn()
 
-            return FunctionCall("", "progn", map, true)
+            return FunctionCall(
+                "", "callw", hashMapOf(
+                    "before" to prep,
+                    "after" to restore,
+                    "expr" to expr
+                ), false
+            )
         }
 
         val functionId = currentToken.value
