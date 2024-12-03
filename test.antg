@@ -1,5 +1,5 @@
-fun foo <a, b> {
-    "Hello, World!"
+fun init <a, b> {
+    sequence { &`a ", " &`b}
 }
 
-eval foo(a = "Lorem", b = "Ipsum")
+eval init(a = "Hello", b = "World")

@@ -104,6 +104,21 @@ class Vector(val dimensions: Array<Double>) {
         return dimensions[n]
     }
 
+    fun dot(v: Vector): Double {
+        if (dimensions.size != v.dimensions.size)
+            throw AntgRuntimeException("Cannot compute the dot product of vectors with varying dimensions.")
+
+        if (dimensions.isEmpty())
+            return 0.0
+
+        var dot = 0.0
+
+        for (dim_i in 0 until dimensions.size)
+            dot += dimensions[dim_i] * v.dimensions[dim_i]
+
+        return dot
+    }
+
     fun string(): String = dimensions.joinToString("|")
 
 }

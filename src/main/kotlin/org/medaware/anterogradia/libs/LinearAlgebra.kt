@@ -79,4 +79,11 @@ class LinearAlgebra(val runtime: Runtime) {
     fun n(vec: Node, n: Node): String =
         Vector.parse(vec.evaluate(runtime)).n(n.evaluate(runtime).antgNumber<Int>()).toString()
 
+    @DiscreteFunction("dot", params = ["a", "b"])
+    fun dot(a: Node, b: Node): String {
+        val v1 = Vector.parse(a.evaluate(runtime))
+        val v2 = Vector.parse(b.evaluate(runtime))
+        return v1.dot(v2).toString()
+    }
+
 }
