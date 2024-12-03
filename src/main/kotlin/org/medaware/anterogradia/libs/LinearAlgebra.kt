@@ -55,9 +55,9 @@ class LinearAlgebra(val runtime: Runtime) {
     fun mul(vector: Node, fac: Node): String =
         Vector.parse(vector.evaluate(runtime)).mul(fac.evaluate(runtime).antgNumber<Double>()).string()
 
-    @DiscreteFunction("div", params = ["v", "fac"])
-    fun div(vector: Node, fac: Node): String =
-        Vector.parse(vector.evaluate(runtime)).div(fac.evaluate(runtime).antgNumber<Double>()).string()
+    @DiscreteFunction("div", params = ["v", "div"])
+    fun div(vector: Node, div: Node): String =
+        Vector.parse(vector.evaluate(runtime)).div(div.evaluate(runtime).antgNumber<Double>()).string()
 
     @DiscreteFunction("normalize", params = ["v"])
     fun normalize(vector: Node): String =
