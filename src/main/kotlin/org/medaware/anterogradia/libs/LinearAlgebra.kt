@@ -79,6 +79,22 @@ class LinearAlgebra(val runtime: Runtime) {
     fun n(vec: Node, n: Node): String =
         Vector.parse(vec.evaluate(runtime)).n(n.evaluate(runtime).antgNumber<Int>()).toString()
 
+    @DiscreteFunction("dims", params = ["v"])
+    fun dimensions(vec: Node): String {
+        val str = vec.evaluate(runtime).trim()
+
+        if (str.isEmpty())
+            return 0.toString()
+
+        return Vector.parse(str).dimensions.size.toString()
+    }
+
+    @DiscreteFunction("max", params = ["v"])
+    fun max(v: Node) = Vector.parse(v.evaluate(runtime)).dimensions.max().toString()
+
+    @DiscreteFunction("min", params = ["v"])
+    fun min(v: Node) = Vector.parse(v.evaluate(runtime)).dimensions.min().toString()
+
     @DiscreteFunction("dot", params = ["a", "b"])
     fun dot(a: Node, b: Node): String {
         val v1 = Vector.parse(a.evaluate(runtime))

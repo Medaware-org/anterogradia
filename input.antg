@@ -5,6 +5,61 @@ validator vector {
     la.validate(str = __validator_value())
 }
 
+fun quadratic_solve <a: real, b: real, c: real> {
+    `neg_b := signflp(expr = &`b)
+    `det := sub(left = pow(expr = &`b, pow = 2), right = mul(left = 4, right = mul(left = &`a, right = &`c)))
+    `denominator := mul(left = 2, right = &`a)
+
+    # One solution
+    if (&`det = 0) {
+        la.v { div(left = add(left = &`neg_b, right = sqrt(expr = &`det)), right = &`denominator) }
+    } else {
+        # Two solutions
+        if (&`det > 0) {
+            la.v {
+                div(left = add(left = &`neg_b, right = sqrt(expr = &`det)), right = &`denominator)
+                div(left = sub(left = &`neg_b, right = sqrt(expr = &`det)), right = &`denominator)
+            }
+        } else { # No real solutions
+            "none"
+        }
+    }
+}
+
+# Compute the ray v. sphere intersection and return
+# the distance along the ray
+fun ray_v_sphere <sphere_c: vector, sphere_r: real, ray_origin: vector, ray_direction: vector> {
+    `P := la.sub { &`ray_origin &`sphere_c }
+    `a := la.dot (a = &`ray_direction, b = &`ray_direction)
+    `b := mul(left = 2.0, right = la.dot (a = &`P, b = &`ray_direction))
+    `c := la.dot (a = &`P, b = &`P)
+
+    `solutions := eval quadratic_solve(a = &`a, b = &`b, c = &`c)
+
+    if (&`solutions = "none") { signflp(expr = 1.0) } else {
+        `dimCount := la.dims(v = &`solutions)
+        if (&`dimCount = 0) {
+            signflp(expr = 1.0)
+        } else {
+            if (&`dimCount = 1) {
+                la.x(v = &`solutions)
+            } else {
+                `_first := la.x(v = &`solutions)
+                `_second := la.y(v = &`solutions)
+                if (&`_first < 0) {
+                    &`_second
+                } else {
+                    if (&`_second < 0) {
+                        &`_first
+                    } else {
+                        la.min (v = &`solutions)
+                    }
+                }
+            }
+        }
+    }
+}
+
 fun ray_direction <width: integer, height: integer, x: integer, y: integer> {
     `planePosition := la.v {
         add(left = mul(left = signflp(expr = 1), right = div(left = &`width, right = 2)), right = &`x)
@@ -16,9 +71,16 @@ fun ray_direction <width: integer, height: integer, x: integer, y: integer> {
 }
 
 fun render_pixel <width: integer, height: integer, x: integer, y: integer> {
-    `direction := la.mul(v = eval ray_direction(width = &`width, height = &`height, x = &`x, y = &`y), fac = 128)
-    `offset := la.v { 128 128 128 }
-    la.sum { &`direction &`offset }
+    `cameraOrigin := la.v { 0 0 0 }
+    `direction := eval ray_direction(width = &`width, height = &`height, x = &`x, y = &`y)
+
+    `intersection := eval ray_v_sphere(sphere_c = la.v { 0 0 5 }, sphere_r = 1.0, ray_origin = &`cameraOrigin, ray_direction = &`direction)
+
+    if (&`intersection < 0) {
+        la.v { 0 0 0 }
+    } else {
+        la.v { 255 255 255}
+    }
 }
 
 fun ppm3_header <width: integer, height: integer> {
@@ -50,4 +112,3 @@ fun render_all <width: integer, height: integer> {
 }
 
 eval render_all(width = 100, height = 100)
-la.dot(a = la.v { 1 1 1 }, b = la.v { 3 2 1 })

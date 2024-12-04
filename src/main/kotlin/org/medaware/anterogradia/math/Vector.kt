@@ -14,7 +14,7 @@ class Vector(val dimensions: Array<Double>) {
     companion object {
         fun parse(str: String): Vector {
             if (str.isEmpty())
-                throw AntgRuntimeException("The vector string is empty")
+                return Vector(arrayOf())
             val components = str.split("|").map { it -> it.antgNumber<Double>() }
             return Vector(components.toTypedArray())
         }
