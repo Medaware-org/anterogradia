@@ -32,7 +32,7 @@ fun ray_v_sphere <sphere_c: vector, sphere_r: real, ray_origin: vector, ray_dire
     `P := la.sub { &`ray_origin &`sphere_c }
     `a := la.dot (a = &`ray_direction, b = &`ray_direction)
     `b := mul(left = 2.0, right = la.dot (a = &`P, b = &`ray_direction))
-    `c := la.dot (a = &`P, b = &`P)
+    `c := sub(left = la.dot (a = &`P, b = &`P), right = pow(expr = &`sphere_r, pow = 2.0))
 
     `solutions := eval quadratic_solve(a = &`a, b = &`b, c = &`c)
 
@@ -61,20 +61,27 @@ fun ray_v_sphere <sphere_c: vector, sphere_r: real, ray_origin: vector, ray_dire
 }
 
 fun ray_direction <width: integer, height: integer, x: integer, y: integer> {
-    `planePosition := la.v {
-        add(left = mul(left = signflp(expr = 1), right = div(left = &`width, right = 2)), right = &`x)
-        add(left = mul(left = signflp(expr = 1), right = div(left = &`height, right = 2)), right = &`y)
-        1.0
-    }
-    `cameraOrigin := la.v { 0 0 0 }
-    la.normalize(v = la.sub { &`planePosition &`cameraOrigin })
+#    `planePosition := la.v {
+#        add(left = mul(left = signflp(expr = 1), right = div(left = &`width, right = 2)), right = &`x)
+#        add(left = mul(left = signflp(expr = 1), right = div(left = &`height, right = 2)), right = &`y)
+#        1.0
+#    }
+#    `cameraOrigin := la.v { 0 0 0 }
+#    la.normalize(v = la.sub { &`planePosition &`cameraOrigin })
+    la.normalize ( v =
+        la.v {
+            sub(left = &`x, right = div(left = &`width, right = 2.0))
+            sub(left = &`y, right = div(left = &`height, right = 2.0))
+            &`width
+        }
+    )
 }
 
 fun render_pixel <width: integer, height: integer, x: integer, y: integer> {
     `cameraOrigin := la.v { 0 0 0 }
     `direction := eval ray_direction(width = &`width, height = &`height, x = &`x, y = &`y)
 
-    `intersection := eval ray_v_sphere(sphere_c = la.v { 0 0 5 }, sphere_r = 1.0, ray_origin = &`cameraOrigin, ray_direction = &`direction)
+    `intersection := eval ray_v_sphere(sphere_c = la.v { 0 0 10 }, sphere_r = 2.0, ray_origin = &`cameraOrigin, ray_direction = &`direction)
 
     if (&`intersection < 0) {
         la.v { 0 0 0 }

@@ -60,8 +60,8 @@ fun randomString(): String {
     return CharArray(128) { chars.random() }.concatToString()
 }
 
-fun Array<out Node>.progn(): FunctionCall = FunctionCall(
+fun Array<out Node>.progn(line: Int): FunctionCall = FunctionCall(
     "", "progn", hashMapOf(*mapIndexed { index, node ->
         index.toString() to node
-    }.toTypedArray()), variadic = true
+    }.toTypedArray()), line, variadic = true
 )

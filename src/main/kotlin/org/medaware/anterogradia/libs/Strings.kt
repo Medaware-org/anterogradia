@@ -9,7 +9,6 @@ import org.medaware.anterogradia.runtime.library.DiscreteFunction
 import org.medaware.anterogradia.runtime.library.StateRetention.STATEFUL
 import org.medaware.anterogradia.syntax.Node
 import org.medaware.anterogradia.syntax.StringLiteral
-import kotlin.String
 
 @AnterogradiaLibrary(STATEFUL)
 class Strings(val runtime: Runtime) {
@@ -71,7 +70,7 @@ class Strings(val runtime: Runtime) {
 
     @DiscreteFunction(identifier = "replace", params = ["org", "regex", "str"])
     fun replace(org: Node, regex: Node, str: Node) =
-        replace(org, regex, str, StringLiteral("all"))
+        replace(org, regex, str, StringLiteral("all", 0))
 
     @DiscreteFunction(identifier = "trim", params = ["str"])
     fun trim(str: Node) = str.evaluate(runtime).trim()
@@ -91,14 +90,16 @@ class Strings(val runtime: Runtime) {
         val endIndex = end.evaluate(runtime).antgNumber<Int>()
         val strStr = str.evaluate(runtime)
 
-        if (startIndex !in 0 .. strStr.length || endIndex !in 0 .. strStr.length ||
-            endIndex < startIndex)
+        if (startIndex !in 0..strStr.length || endIndex !in 0..strStr.length ||
+            endIndex < startIndex
+        )
             throw AntgRuntimeException("Start and End index are invalid.")
 
         return strStr.substring(startIndex, endIndex)
     }
 
     @DiscreteFunction(identifier = "substr", params = ["str", "start"])
-    fun substr(str: Node, start: Node): String = substr(str, start, StringLiteral(str.evaluate(runtime).length.toString()))
+    fun substr(str: Node, start: Node): String =
+        substr(str, start, StringLiteral(str.evaluate(runtime).length.toString(), 0))
 
 }

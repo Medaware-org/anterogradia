@@ -31,23 +31,25 @@ class Parser(private val tokenizer: Tokenizer) {
 
     fun parserEntrypoint(): FunctionCall {
         val expressions = mutableListOf<Node>()
+        val line = currentToken.line
         while (currentToken.orNull() != null)
             expressions.add(parseExpression())
         val prognParams = hashMapOf<String, Node>()
         expressions.forEachIndexed { index, it ->
             prognParams.put(index.toString(), it)
         }
-        return FunctionCall("", "progn", prognParams, true)
+        return FunctionCall("", "progn", prognParams, line, true)
     }
 
     private fun parseSimpleExpression(): Node {
         val getBinding = (currentToken.type == TokenType.AMPERSAND)
+        val line = currentToken.line
 
         if (getBinding)
             consume() // '&'
 
         if (currentToken.type == TokenType.UNDEFINED)
-            return StringLiteral("")
+            return StringLiteral("", line)
 
         if (currentToken.compareToken(TokenType.LPAREN)) {
             consume() // '('
@@ -65,7 +67,7 @@ class Parser(private val tokenizer: Tokenizer) {
             if (currentToken.type != TokenType.VBAR)
                 throw ParseException("Expected '|' after magnitude expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
             consume() // '|'
-            return FunctionCall("", "len", hashMapOf("expr" to expr), false)
+            return FunctionCall("", "len", hashMapOf("expr" to expr), line, false)
         }
 
         val expr = parseBindings() ?: when (currentToken.type) {
@@ -76,10 +78,11 @@ class Parser(private val tokenizer: Tokenizer) {
             else -> throw ParseException("Could not parse expression: Unknown expression starting with token of type ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
         }
 
-        return if (getBinding) FunctionCall("", "get", hashMapOf("key" to expr), false) else expr
+        return if (getBinding) FunctionCall("", "get", hashMapOf("key" to expr), line, false) else expr
     }
 
     fun parseAdditiveExpression(): Node {
+        val line = currentToken.line
         var left = parseSimpleExpression()
 
         if (currentToken.compareToken(TokenType.EQUALS)) {
@@ -88,6 +91,7 @@ class Parser(private val tokenizer: Tokenizer) {
                 "",
                 "equal",
                 hashMapOf(Standard.CMP_LEFT to left, Standard.CMP_RIGHT to parseSimpleExpression()),
+                line,
                 false
             )
         } else if (currentToken.compareToken(TokenType.LGREATER)) {
@@ -96,6 +100,7 @@ class Parser(private val tokenizer: Tokenizer) {
                 "",
                 "lgt",
                 hashMapOf(Standard.CMP_LEFT to left, Standard.CMP_RIGHT to parseSimpleExpression()),
+                line,
                 false
             )
         } else if (currentToken.compareToken(TokenType.RGREATER)) {
@@ -104,6 +109,7 @@ class Parser(private val tokenizer: Tokenizer) {
                 "",
                 "rgt",
                 hashMapOf(Standard.CMP_LEFT to left, Standard.CMP_RIGHT to parseSimpleExpression()),
+                line,
                 false
             )
         }
@@ -112,6 +118,7 @@ class Parser(private val tokenizer: Tokenizer) {
     }
 
     fun parseExpression(): Node {
+        val line = currentToken.line
         val negated = currentToken.compareToken(TokenType.EXCLAMATION)
 
         if (negated)
@@ -122,11 +129,11 @@ class Parser(private val tokenizer: Tokenizer) {
         // Variable assignment
         if (currentToken.compareToken(TokenType.ASSIGN_RIGHT)) {
             consume() // ':='
-            left = FunctionCall("", "set", hashMapOf("key" to left, "value" to parseSimpleExpression()), false)
+            left = FunctionCall("", "set", hashMapOf("key" to left, "value" to parseSimpleExpression()), line, false)
         }
 
         if (negated)
-            left = FunctionCall("", "not", hashMapOf("cond" to left), false)
+            left = FunctionCall("", "not", hashMapOf("cond" to left), line, false)
 
         return left
     }
@@ -135,6 +142,7 @@ class Parser(private val tokenizer: Tokenizer) {
      * Parse the block as a `progn` call
      */
     fun parseBlock(): FunctionCall {
+        val line = currentToken.line
         if (!currentToken.compareToken(TokenType.LCURLY))
             throw ParseException("Expected '{' at the beginning of a block expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
@@ -154,10 +162,12 @@ class Parser(private val tokenizer: Tokenizer) {
 
         consume() // Skip '}'
 
-        return FunctionCall("", "progn", params, true)
+        return FunctionCall("", "progn", params, line, true)
     }
 
     fun parseBindings(): Node? {
+        val line = currentToken.line
+
         if (currentToken.compareToken("if"))
             return parseIfConstruct()
 
@@ -176,9 +186,9 @@ class Parser(private val tokenizer: Tokenizer) {
         var result: Node? = null
 
         if (currentToken.compareToken("true"))
-            result = StringLiteral("true")
+            result = StringLiteral("true", line)
         else if (currentToken.compareToken("false"))
-            result = StringLiteral("false")
+            result = StringLiteral("false", line)
 
         if (result != null) {
             consume()
@@ -189,6 +199,8 @@ class Parser(private val tokenizer: Tokenizer) {
     }
 
     fun parseIfConstruct(): FunctionCall {
+        val line = currentToken.line
+
         if (!currentToken.compareToken("if"))
             throw ParseException("Expected identifier 'if' at the start of an if construct, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
@@ -215,8 +227,9 @@ class Parser(private val tokenizer: Tokenizer) {
                 hashMapOf<String, Node>(
                     "cond" to expr,
                     "then" to thenFunction,
-                    "else" to FunctionCall("", "nothing", hashMapOf())
-                )
+                    "else" to FunctionCall("", "nothing", hashMapOf(), line)
+                ),
+                line
             )
 
         consume() // 'else'
@@ -230,11 +243,14 @@ class Parser(private val tokenizer: Tokenizer) {
                 "cond" to expr,
                 "then" to thenFunction,
                 "else" to elseFunction
-            )
+            ),
+            line
         )
     }
 
     fun parseFunctionEval(): FunctionCall {
+        val line = currentToken.line
+
         if (!currentToken.compareToken("eval"))
             throw ParseException("Expected identifier 'eval' at the start of an evaluation, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
@@ -264,47 +280,50 @@ class Parser(private val tokenizer: Tokenizer) {
                                 var obfuscated = randomString()
                                 preservations[id] = obfuscated
                                 return@let obfuscated
-                            }),
+                            }, line),
                             "value" to FunctionCall(
                                 "", "get", hashMapOf(
-                                    "key" to StringLiteral(arg),
-                                )
+                                    "key" to StringLiteral(arg, line),
+                                ), line
                             )
-                        )
+                        ), line
                     ),
                     FunctionCall(
                         "",
                         "set",
-                        hashMapOf("key" to StringLiteral(arg), "value" to call.arguments[arg]!!)
+                        hashMapOf("key" to StringLiteral(arg, line), "value" to call.arguments[arg]!!),
+                        line
                     ),
                 )
-            }.toTypedArray().progn()
+            }.toTypedArray().progn(line)
 
-            val expr = FunctionCall("", "_eval", hashMapOf("id" to StringLiteral(call.identifier)), false)
+            val expr = FunctionCall("", "_eval", hashMapOf("id" to StringLiteral(call.identifier, line)), line, false)
 
             val restore = call.arguments.keys.map { arg ->
                 FunctionCall(
                     "",
                     "set",
                     hashMapOf(
-                        "key" to StringLiteral(arg),
+                        "key" to StringLiteral(arg, line),
                         "value" to FunctionCall(
                             "",
                             "get",
                             hashMapOf(
-                                "key" to StringLiteral(preservations[arg]!!)
-                            )
+                                "key" to StringLiteral(preservations[arg]!!, line)
+                            ),
+                            line
                         )
-                    )
+                    ),
+                    line
                 )
-            }.toTypedArray().progn()
+            }.toTypedArray().progn(line)
 
             return FunctionCall(
                 "", "callw", hashMapOf(
                     "before" to prep,
                     "after" to restore,
                     "expr" to expr
-                ), false
+                ), line, false
             )
         }
 
@@ -312,10 +331,12 @@ class Parser(private val tokenizer: Tokenizer) {
 
         consume() // Identifier
 
-        return FunctionCall("", "_eval", hashMapOf("id" to StringLiteral(functionId)), false)
+        return FunctionCall("", "_eval", hashMapOf("id" to StringLiteral(functionId, line)), line, false)
     }
 
     fun parseWhileLoop(): FunctionCall {
+        val line = currentToken.line
+
         if (!currentToken.compareToken("while"))
             throw ParseException("Expected identifier 'while' at the start of a while expression, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
@@ -335,10 +356,12 @@ class Parser(private val tokenizer: Tokenizer) {
 
         val blk = parseBlock()
 
-        return FunctionCall("", "_while", hashMapOf("cond" to expr, "expr" to blk))
+        return FunctionCall("", "_while", hashMapOf("cond" to expr, "expr" to blk), line)
     }
 
     fun parseValidatorDefinition(): FunctionCall {
+        val line = currentToken.line
+
         if (!currentToken.compareToken("validator"))
             throw ParseException("Expected identifier 'validator' at the start of a validator definition, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
@@ -360,27 +383,29 @@ class Parser(private val tokenizer: Tokenizer) {
 
         val def = FunctionCall(
             "", "_fun", hashMapOf(
-                "id" to StringLiteral(obfuscated),
+                "id" to StringLiteral(obfuscated, line),
                 "expr" to block
-            ), variadic = false
+            ), line, variadic = false
         )
 
         val reg = FunctionCall(
             "", "__register_validator", hashMapOf(
-                "type" to StringLiteral(typeId),
-                "validator" to StringLiteral(obfuscated)
-            )
+                "type" to StringLiteral(typeId, line),
+                "validator" to StringLiteral(obfuscated, line)
+            ), line
         )
 
         return FunctionCall(
             "", "progn", hashMapOf(
                 "1" to def,
                 "2" to reg
-            ), variadic = true
+            ), line, variadic = true
         )
     }
 
     fun parseFunctionDefinition(): FunctionCall {
+        val line = currentToken.line
+
         if (!currentToken.compareToken("fun"))
             throw ParseException("Expected identifier 'fun' at the start of a function definition, got ${currentToken.type} \"${currentToken.value}\" on line ${currentToken.line}.")
 
@@ -450,24 +475,29 @@ class Parser(private val tokenizer: Tokenizer) {
                                 "",
                                 "__require_prop",
                                 hashMapOf(
-                                    "id" to StringLiteral(it.first),
-                                    "err" to StringLiteral("The property '${it.first}' required for function '$functionId' was not present at the time of evaluation.")
-                                )
+                                    "id" to StringLiteral(it.first, line),
+                                    "err" to StringLiteral(
+                                        "The property '${it.first}' required for function '$functionId' was not present at the time of evaluation.",
+                                        line
+                                    )
+                                ),
+                                line
                             ),
                             "2" to FunctionCall(
                                 "", "__validate", hashMapOf(
-                                    "type" to StringLiteral(it.second),
+                                    "type" to StringLiteral(it.second, line),
                                     "value" to FunctionCall(
                                         "",
                                         "get",
                                         hashMapOf(
-                                            "key" to StringLiteral(it.first)
+                                            "key" to StringLiteral(it.first, line)
                                         ),
+                                        line,
                                         false
                                     )
-                                ), false
+                                ), line, false
                             )
-                        ), variadic = true
+                        ), line, variadic = true
                     )
                 )
             }
@@ -476,19 +506,21 @@ class Parser(private val tokenizer: Tokenizer) {
             wrapperParams.put(requiredParams.size.toString(), blk)
 
             blk = FunctionCall(
-                "", "progn", wrapperParams, true
+                "", "progn", wrapperParams, line, true
             )
         }
 
         return FunctionCall(
             "", "_fun", hashMapOf(
-                "id" to StringLiteral(functionId),
+                "id" to StringLiteral(functionId, line),
                 "expr" to blk
-            ), false
+            ), line, false
         )
     }
 
     fun parseStringLiteral(): StringLiteral {
+        val line = currentToken.line
+
         val value: String = when (currentToken.type) {
             TokenType.STRING_LITERAL,
             TokenType.NUMBER_LITERAL -> currentToken.value
@@ -498,7 +530,7 @@ class Parser(private val tokenizer: Tokenizer) {
 
         consume()
 
-        return StringLiteral(value)
+        return StringLiteral(value, line)
     }
 
     fun parseLoadInstruction(): Pair<String, String>? {
@@ -535,6 +567,8 @@ class Parser(private val tokenizer: Tokenizer) {
     }
 
     fun parseFunctionCall(): FunctionCall {
+        val line = currentToken.line
+
         if (!currentToken.compareToken(TokenType.IDENTIFIER))
             throw ParseException("Could not parse function call: Unexpected token of type ${currentToken.type} \"${currentToken.value}\" found on line ${currentToken.line} in place of the function identifier or library prefix.")
 
@@ -580,7 +614,7 @@ class Parser(private val tokenizer: Tokenizer) {
 
         if (currentToken.compareToken(closingType)) {
             consume() // Skip the closing token
-            return FunctionCall(libPrefix, functionId, params, variadic = variadic)
+            return FunctionCall(libPrefix, functionId, params, line, variadic = variadic)
         }
 
         while (true) {
@@ -624,7 +658,7 @@ class Parser(private val tokenizer: Tokenizer) {
             break
         }
 
-        return FunctionCall(libPrefix, functionId, params, variadic = variadic)
+        return FunctionCall(libPrefix, functionId, params, line, variadic = variadic)
     }
 
     companion object {

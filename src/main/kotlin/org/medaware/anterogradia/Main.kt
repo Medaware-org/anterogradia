@@ -10,6 +10,6 @@ fun main() {
         println("Error: " + (result.exception.rootCause().message ?: "Unknown error"))
         return
     }
+    println(result.output)
     Files.writeString(Path.of("image.ppm"), result.output)
-    print(result.output)
 }

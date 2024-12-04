@@ -79,7 +79,10 @@ class Standard(val runtime: Runtime) {
     }
 
     @DiscreteFunction(identifier = "get", params = ["key"])
-    fun get(key: Node): String = variableStore[key.evaluate(runtime)] ?: ""
+    fun get(key: Node): String {
+        val id = key.evaluate(runtime)
+        return variableStore[id] ?: ""
+    }
 
     @DiscreteFunction(identifier = "_if", params = ["cond", "then", "else"])
     fun _if(str: Node, then: Node, _else: Node): String {
@@ -93,14 +96,25 @@ class Standard(val runtime: Runtime) {
     }
 
     @DiscreteFunction(identifier = "equal", params = [CMP_LEFT, CMP_RIGHT])
-    fun equal(left: Node, right: Node): String = if (left.evaluate(runtime) == right.evaluate(runtime)) TRUE else FALSE
+    fun equal(left: Node, right: Node): String {
+        val leftStr = left.evaluate(runtime)
+        val rightStr = right.evaluate(runtime)
+
+        val leftNumber = leftStr.antgNumberOrNull<Double>()
+        val rightNumber = rightStr.antgNumberOrNull<Double>()
+
+        if (leftNumber != null && rightNumber != null)
+            return (leftNumber == rightNumber).map(TRUE, FALSE)
+
+        return if (left.evaluate(runtime) == right.evaluate(runtime)) TRUE else FALSE
+    }
 
     @DiscreteFunction(identifier = "lgt", params = [CMP_LEFT, CMP_RIGHT])
     fun lgt(a: Node, b: Node): String {
         val leftStr = a.evaluate(runtime)
         val rightStr = b.evaluate(runtime)
 
-        val integers = (leftStr.antgNumberOrNull<Int>() to rightStr.antgNumberOrNull<Int>())
+        val integers = (leftStr.antgNumberOrNull<Double>() to rightStr.antgNumberOrNull<Double>())
 
         // If both operands are integers, perform a numerical comparison
         if (!integers.hasNullEntry())
@@ -108,8 +122,8 @@ class Standard(val runtime: Runtime) {
 
         // If only one type is an integer, compare to the remaining string's length
         if (integers.hasNullEntry() && integers.hasNonNullEntry()) {
-            val left = integers.first ?: leftStr.length
-            val right = integers.second ?: rightStr.length
+            val left = integers.first ?: leftStr.length.toDouble()
+            val right = integers.second ?: rightStr.length.toDouble()
             return (left > right).map(TRUE, FALSE)
         }
 
@@ -122,7 +136,7 @@ class Standard(val runtime: Runtime) {
         val leftStr = a.evaluate(runtime)
         val rightStr = b.evaluate(runtime)
 
-        val integers = (leftStr.antgNumberOrNull<Int>() to rightStr.antgNumberOrNull<Int>())
+        val integers = (leftStr.antgNumberOrNull<Double>() to rightStr.antgNumberOrNull<Double>())
 
         // If both operands are integers, perform a numerical comparison
         if (!integers.hasNullEntry())
@@ -130,8 +144,8 @@ class Standard(val runtime: Runtime) {
 
         // If only one type is an integer, compare to the remaining string's length
         if (integers.hasNullEntry() && integers.hasNonNullEntry()) {
-            val left = integers.first ?: leftStr.length
-            val right = integers.second ?: rightStr.length
+            val left = integers.first ?: leftStr.length.toDouble()
+            val right = integers.second ?: rightStr.length.toDouble()
             return (left < right).map(TRUE, FALSE)
         }
 
@@ -282,7 +296,7 @@ class Standard(val runtime: Runtime) {
 
     @DiscreteFunction(identifier = "__validator_value")
     fun __validator_value(): String {
-        return get(StringLiteral(validatorValueId))
+        return get(StringLiteral(validatorValueId, 0))
     }
 
     @DiscreteFunction(identifier = "__register_validator", params = ["type", "validator"])
@@ -292,10 +306,10 @@ class Standard(val runtime: Runtime) {
         if (functionStore[validatorStr] == null)
             throw AntgRuntimeException("The requested validator function '$validatorStr' does not exist.")
         runtime.registerValidator(typeStr) { input ->
-            val previousValue = get(StringLiteral(validatorValueId))
-            set(StringLiteral(validatorValueId), StringLiteral(input))
+            val previousValue = get(StringLiteral(validatorValueId, 0))
+            set(StringLiteral(validatorValueId, 0), StringLiteral(input, 0))
             val status = _eval(validator) == "true"
-            set(StringLiteral(validatorValueId), StringLiteral(previousValue))
+            set(StringLiteral(validatorValueId, 0), StringLiteral(previousValue, 0))
             status
         }
         return "true"
